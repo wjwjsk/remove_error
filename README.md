@@ -25,6 +25,6 @@
 
 ## 기술 스택
 
-    프론트엔드: DTL, JavaScript
+    프론트엔드: DTL, BootStrap, JavaScript
     백엔드: Python, Django
     데이터베이스: Postgres

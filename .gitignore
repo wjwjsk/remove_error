@@ -2,3 +2,4 @@ myenv
 \__pycache__
 config.json
 migrations
+.vscode/launch.json

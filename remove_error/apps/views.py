@@ -7,7 +7,8 @@ from .crawl import fm_crawling_function
 
 # 메인 페이지
 def main(request):
-    items = Items.objects.all()
+    items = Items.objects.all()[:10]
+    # 너무 많아서 우선 10개만
     categories = Category.objects.all()
 
     context = {

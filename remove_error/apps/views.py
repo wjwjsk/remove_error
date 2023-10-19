@@ -15,7 +15,7 @@ def main(request):
         "categories": categories,
     }
     
-        # 해당 내용 주석 해제 후 새로고침시 db에 크롤링 데이터 추가됩니다(같은내용도 추가되므로 추후 수정필요)
+# #해당 내용 주석 해제 후 새로고침시 db에 크롤링 데이터 추가됩니다(같은내용도 추가되므로 추후 수정필요)
 #     result = fm_crawling_function()
 # # 전치 수행
 #     transposed_result = list(zip(*result))

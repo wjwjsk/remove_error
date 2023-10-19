@@ -43,11 +43,13 @@ def fm_crawling_function():
                 
                 desc_div = in_soup.select_one('div article div')
                 desc_p = desc_div.find_all('p')
-                #설명 p태그마다 가져오기
+                #설명 p태그 내부 텍스트 and br태그중 클래스없는 br만 가져오기
                 description = ""
-                for i in range(1, len(desc_p)):
-                    p = desc_p[i]
-                    description += str(p)                   
+                for p in desc_p[1:]:
+                    if p.name == 'br' and 'class' not in p.attrs:
+                        description += str(p)
+                    else:
+                        description += p.get_text()                 
                                 
                 if 'hotdeal_var8Y' in link.select_one('.li h3 a')['class']:
                     fm_datas[page].append({'board_url' : fm_home + href, 'item_name' : title, 'end_url' : shop_url, 'clr_update_time': formatted_time, 
@@ -78,9 +80,11 @@ def fm_crawling_function():
                 desc_p = desc_div.find_all('p')
                 #설명 p태그마다 가져오기
                 description = ""
-                for i in range(1, len(desc_p)):
-                    p = desc_p[i]
-                    description += str(p)                   
+                for p in desc_p[1:]:
+                    if p.name == 'br' and 'class' not in p.attrs:
+                        description += str(p)
+                    else:
+                        description += p.get_text()                 
                                 
                 if 'hotdeal_var8Y' in link.select_one('.li h3 a')['class']:
                     fm_datas[page].append({'board_url' : fm_home + href, 'item_name' : title, 'end_url' : shop_url, 'clr_update_time': formatted_time, 

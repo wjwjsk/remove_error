@@ -1,6 +1,4 @@
 asgiref==3.7.2
-aspose-pdf==23.9.0
-Aspose.Slides==23.9.0
 beautifulsoup4==4.12.2
 certifi==2023.7.22
 charset-normalizer==3.3.0

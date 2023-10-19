@@ -70,19 +70,47 @@
             padding: 8px;
         }
     
-        /* 추가한 스타일 */
-        input[type="checkbox"] {
-            margin-left: 10px;
-        }
-    
         .delete-button {
             background-color: #ff0000;
             color: #fff;
-            padding: 10px 15px;
+            padding: 8px 12px; /* 버튼 크기 조정 */
             border: none;
+            border-radius: 5px;
             cursor: pointer;
-            margin-top: 10px;
+            transition: background-color 0.2s, color 0.2s;
         }
+    
+        .delete-button:hover {
+            background-color: #ff3333;
+        }
+
+        /* 검색창 스타일 */
+        .search-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .search-container input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .search-container button {
+            padding: 8px 12px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .search-container button:hover {
+            background-color: #555;
+        }
+
+
     </style>
     
     
@@ -101,7 +129,12 @@
                 <li>No categories available.</li>
             {% endfor %}
         </ul>
-
+        {% comment %} <div class="search-container">
+            <form method="get" action="{% url 'search' %}">
+                <input type="text" name="search" placeholder="검색어를 입력하세요">
+                <button type="submit">검색</button>
+            </form>
+        </div> {% endcomment %}
         <h2>아이템 목록</h2>
         <table class="table table-bordered">
             <thead>
@@ -133,6 +166,13 @@
                         <td>{{ item.first_price }}</td>
                         <td>{{ item.delivery_price }}</td>
                         <td>{% if item.is_end_deal %}종료{% else %}진행중{% endif %}</td>
+                        <!-- 삭제 버튼과 form 태그 추가 -->
+                        <td>
+                            <form method="post" action="{% url 'delete_item' item.id %}">
+                                {% csrf_token %}
+                                <button type="submit">삭제</button>
+                            </form>
+                        </td>
                     </tr>
                 {% empty %}
                     <tr>

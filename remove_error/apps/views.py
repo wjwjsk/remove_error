@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Items, Category
 from django.http import JsonResponse
+from django.db.models import Q
 
 
 # 메인 페이지
@@ -35,3 +36,12 @@ def item_list_by_category(request, category_id):
         "categories": categories,
     }
     return render(request, "index.html", context)
+
+
+def delete_item(request, item_id):
+    try:
+        item = Items.objects.get(id=item_id)
+        item.delete()
+        return redirect("main")
+    except Items.DoesNotExist:
+        return JsonResponse({"message": "아이템이 존재하지 않습니다."}, status=404)

@@ -3,3 +3,5 @@ myenv
 config.json
 migrations
 .vscode/launch.json
+*.txt
+

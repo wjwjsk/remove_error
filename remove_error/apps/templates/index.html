@@ -129,12 +129,12 @@
                 <li>No categories available.</li>
             {% endfor %}
         </ul>
-        {% comment %} <div class="search-container">
+        <div class="search-container">
             <form method="get" action="{% url 'search' %}">
                 <input type="text" name="search" placeholder="검색어를 입력하세요">
                 <button type="submit">검색</button>
             </form>
-        </div> {% endcomment %}
+        </div>
         <h2>아이템 목록</h2>
         <table class="table table-bordered">
             <thead>

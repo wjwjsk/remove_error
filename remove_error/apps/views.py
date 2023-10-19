@@ -45,3 +45,25 @@ def delete_item(request, item_id):
         return redirect("main")
     except Items.DoesNotExist:
         return JsonResponse({"message": "아이템이 존재하지 않습니다."}, status=404)
+
+
+def search(request):
+    query = request.GET.get("search")
+    if query:
+        results = Items.objects.filter(
+            Q(item_name__icontains=query)
+            | Q(board_desciption__icontains=query)
+            | Q(category__name__icontains=query)
+        )
+        categories_in_results = Category.objects.filter(items__in=results).distinct()
+
+        context = {
+            "items": results,
+            "categories": categories_in_results,
+        }
+    else:
+        context = {
+            "items": Items.objects.all(),
+            "categories": Category.objects.all(),
+        }
+    return render(request, "index.html", context)

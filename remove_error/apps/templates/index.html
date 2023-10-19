@@ -1,20 +1,190 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="" />
-        <meta name="author" content="" />
-        <title>Bare - Start Bootstrap Template</title>
-        <!-- Favicon-->
-        <link rel="icon" type="image/x-icon" href="" />
-        <!-- Core theme CSS (includes Bootstrap)-->
-        <link href="{% static "css/nav.css" %}" rel="stylesheet" />
-    </head>
-    <body>
-        {% include "nav.html" %}
-    </body>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static "js/nav.js" %}"></script>
-    </html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>아이템 목록</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="{% static "css/nav.css" %}" rel="stylesheet">
+
+    <style>
+        /* 공통 스타일 */
+        body {
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+    
+        .container {
+            margin-top: 20px;
+        }
+    
+        h1 {
+            color: #333;
+        }
+    
+        /* 카테고리 목록 스타일 */
+        .category-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+    
+        .category-list li {
+            display: inline-block;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    
+        .category-list a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            padding: 15px; /* 수정된 부분: 크기를 키우기 위해 padding을 조정 */
+            background-color: #f8f8f8;
+            transition: background-color 0.2s, color 0.2s;
+        }
+    
+        .category-list a:hover {
+            background-color: #333;
+            color: #fff;
+        }
+    
+        /* 테이블 스타일 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+    
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
+    
+        .delete-button {
+            background-color: #ff0000;
+            color: #fff;
+            padding: 8px 12px; /* 버튼 크기 조정 */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+    
+        .delete-button:hover {
+            background-color: #ff3333;
+        }
+
+        /* 검색창 스타일 */
+        .search-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .search-container input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .search-container button {
+            padding: 8px 12px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .search-container button:hover {
+            background-color: #555;
+        }
+
+
+    </style>
+    
+    
+
+</head>
+<body>
+    {% include "nav.html" %}
+    <div class="container">
+        <h1>아이템 목록</h1>
+        <h2>카테고리 목록</h2>
+        <ul class="category-list">
+            <li><a href="{% url 'main' %}">전체</a></li>
+            {% for category in categories %}
+                <li><a href="{% url 'item_list_by_category' category.id %}">{{ category.name }}</a></li>
+            {% empty %}
+                <li>No categories available.</li>
+            {% endfor %}
+        </ul>
+        <div class="search-container">
+            <form method="get" action="{% url 'search' %}">
+                <input type="text" name="search" placeholder="검색어를 입력하세요">
+                <button type="submit">검색</button>
+            </form>
+        </div>
+        <h2>아이템 목록</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>이름</th>
+                    <th>end_URL</th>
+                    <th>board_URL</th>
+                    <th>가격</th>
+                    <th>설명</th>
+                    <th>카테고리</th>
+                    <th>업데이트 시간</th>
+                    <th>발견 시간</th>
+                    <th>첫 가격</th>
+                    <th>배송비</th>
+                    <th>종료 여부</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td>{{ item.item_name }}</td>
+                        <td>{{ item.end_url }}</td>
+                        <td>{{ item.board_url }}</td>
+                        <td>{{ item.board_price }}</td>
+                        <td>{{ item.board_desciption }}</td>
+                        <td>{{ item.category.name }}</td> 
+                        <td>{{ item.clr_update_time }}</td>
+                        <td>{{ item.find_item_time }}</td>
+                        <td>{{ item.first_price }}</td>
+                        <td>{{ item.delivery_price }}</td>
+                        <td>{% if item.is_end_deal %}종료{% else %}진행중{% endif %}</td>
+                        <!-- 삭제 버튼과 form 태그 추가 -->
+                        <td>
+                            <form method="post" action="{% url 'delete_item' item.id %}">
+                                {% csrf_token %}
+                                <button type="submit">삭제</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="10">No items available.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+    </div>
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static "js/nav.js" %}"></script>
+</html>

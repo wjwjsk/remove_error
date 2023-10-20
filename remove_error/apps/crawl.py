@@ -168,7 +168,7 @@ def pp_crawling_function():
             
     # return fm_datas
 
-pp_crawling_function()
+#pp_crawling_function()
 # txt_write(pp_crawling_function())
 
             

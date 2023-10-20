@@ -89,3 +89,6 @@ def search(request):
             "categories": Category.objects.all(),
         }
     return render(request, "index.html", context)
+
+def detail(request):
+    return render(request, "detail.html", )

@@ -108,49 +108,74 @@ def crawl_page(request):
     result = fm_crawling_function()
     transposed_result = list(zip(*result))
     fm_count = 0
-
+    temp = []
     for column in transposed_result:
         for data in column:
             if not Items.objects.filter(
                 Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
             ).exists():
-                result_model = Items(
-                    item_name=data["item_name"],
-                    end_url=data["end_url"],
-                    board_url=data["board_url"],
-                    clr_update_time=data["clr_update_time"],
-                    board_price=data["board_price"],
-                    board_description=data["board_description"],
-                    delivery_price=data["delivery_price"],
-                    is_end_deal=data["is_end_deal"],
-                    category=categorize_deals(data["category"]),
-                )
-                result_model.save()
-                fm_count += 1
+                if data["is_end_deal"] == "False" or data["is_end_deal"] == "false":
+                    result_model = Items(
+                        item_name=data["item_name"],
+                        end_url=data["end_url"],
+                        board_url=data["board_url"],
+                        clr_update_time=data["clr_update_time"],
+                        board_price=data["board_price"],
+                        board_description=data["board_description"],
+                        delivery_price=data["delivery_price"],
+                        is_end_deal=data["is_end_deal"],
+                        category=categorize_deals(data["category"]),
+                    )
+                    result_model.save()
+                    temp.append(f"{data['item_name']} : {data['is_end_deal']}")
+                    fm_count += 1
+            else:
+                result_model = Items.objects.filter(
+                    Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+                ).first()
+                if data["board_url"] == result_model.board_url:
+                    result_model.board_url = data["board_url"]
+                    result_model.clr_update_time = data["clr_update_time"]
+                    result_model.board_price = data["board_price"]
+                    result_model.board_description = data["board_description"]
+                    result_model.delivery_price = data["delivery_price"]
+                    result_model.is_end_deal = data["is_end_deal"]
+                    result_model.save()
 
     # pp_crawling_function
+    pp_count = 0
     result = pp_crawling_function()
     transposed_result = list(zip(*result))
-    pp_count = 0
 
     for column in transposed_result:
         for data in column:
             if not Items.objects.filter(
                 Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
             ).exists():
-                result_model = Items(
-                    item_name=data["item_name"],
-                    end_url=data["end_url"],
-                    board_url=data["board_url"],
-                    clr_update_time=data["clr_update_time"],
-                    board_price="제목 참조",
-                    board_description=data["board_description"],
-                    delivery_price="제목 참조",
-                    is_end_deal=data["is_end_deal"],
-                    category=categorize_deals(data["category"]),
-                )
-                result_model.save()
-                pp_count += 1
+                if data["is_end_deal"] == "False" or data["is_end_deal"] == "false":
+                    result_model = Items(
+                        item_name=data["item_name"],
+                        end_url=data["end_url"],
+                        board_url=data["board_url"],
+                        clr_update_time=data["clr_update_time"],
+                        board_price="제목 참조",
+                        board_description=data["board_description"],
+                        delivery_price="제목 참조",
+                        is_end_deal=data["is_end_deal"],
+                        category=categorize_deals(data["category"]),
+                    )
+                    result_model.save()
+                    pp_count += 1
+            else:
+                result_model = Items.objects.filter(
+                    Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+                ).first()
+                if data["board_url"] == result_model.board_url:
+                    result_model.board_url = data["board_url"]
+                    result_model.clr_update_time = data["clr_update_time"]
+                    result_model.board_description = data["board_description"]
+                    result_model.is_end_deal = data["is_end_deal"]
+                    result_model.save()
 
     # is_end_deal이 True인 항목 삭제
     deleted_items = Items.objects.filter(is_end_deal=True)

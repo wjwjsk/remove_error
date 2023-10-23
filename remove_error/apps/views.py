@@ -222,3 +222,7 @@ def search(request):
 
 def detail(request):
     return render(request, "detail.html")
+
+def main_ex1(request):
+    return render(request, "main_ex1.html", )
+

@@ -88,8 +88,8 @@ def categorize_deals(category):
 
 
 def main(request):
-    items = Items.objects.all()[:10]
-    # 너무 많아서 우선 10개만
+    items = Items.objects.all()
+
     categories = Category.objects.all()
 
     context = {
@@ -97,19 +97,21 @@ def main(request):
         "categories": categories,
     }
 
-    # 해당 내용 주석 해제 후 새로고침시 db에 크롤링 데이터 추가됩니다(같은내용도 추가되므로 추후 수정필요)
+    return render(request, "index.html", context)
+
+
+# 크롤링 페이지
+def crawl_page(request):
+    # 크롤링 수행 및 추가된 레코드 수 카운트
     result = fm_crawling_function()
-    # 전치 수행
     transposed_result = list(zip(*result))
     count = 0
 
     for column in transposed_result:
         for data in column:
-            # item_name 또는 end_url 중 하나라도 같은 레코드가 있는지 확인
             if not Items.objects.filter(
                 Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
             ).exists():
-                # 중복된 레코드가 없을 때만 저장
                 result_model = Items(
                     item_name=data["item_name"],
                     end_url=data["end_url"],
@@ -121,11 +123,26 @@ def main(request):
                     is_end_deal=data["is_end_deal"],
                     category=categorize_deals(data["category"]),
                 )
+                print("=======")
+                print(
+                    f"{data['item_name']} : {data['category']} : {categorize_deals(data['category'])}"
+                )
+                print("=======")
                 result_model.save()
                 count += 1
 
-    print(f"{count} 레코드 추가")
-    return render(request, "index.html", context)
+    # is_end_deal이 True인 항목 삭제
+    deleted_items = Items.objects.filter(is_end_deal=True)
+    deleted_count = deleted_items.count()
+    deleted_items.delete()
+
+    context = {
+        "count": count,
+        "deleted_count": deleted_count,
+    }
+
+    # crawl_page.html 템플릿 렌더링
+    return render(request, "crawl_page.html", context)
 
 
 # 상세 페이지
@@ -140,7 +157,7 @@ def main(request):
 
 def item_list_by_category(request, category_id):
     # 선택한 카테고리에 해당하는 아이템들을 필터링합니다.
-    items = Items.objects.filter(category=category_id)[:10]
+    items = Items.objects.filter(category=category_id)
     categories = Category.objects.all()
 
     context = {
@@ -164,9 +181,9 @@ def search(request):
     if query:
         results = Items.objects.filter(
             Q(item_name__icontains=query)
-            | Q(board_desciption__icontains=query)
+            | Q(board_description__icontains=query)
             | Q(category__name__icontains=query)
-        )[:10]
+        )
         categories_in_results = Category.objects.filter(items__in=results).distinct()
 
         context = {
@@ -180,5 +197,6 @@ def search(request):
         }
     return render(request, "index.html", context)
 
+
 def detail(request):
-    return render(request, "detail.html", )
+    return render(request, "detail.html")

@@ -1,4 +1,4 @@
-import requests, subprocess, re, datetime, time, concurrent.futures ,json
+import requests, subprocess, re, datetime, time, concurrent.futures, json
 from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
 from django.utils import timezone
@@ -15,6 +15,7 @@ def txt_write(data):
     with open("page_html.txt", "w", encoding="utf-8") as file:
         file.write(data)
     subprocess.run(["start", "page_html.txt"], shell=True)  # Windows
+
 
 def json_write(data):
     json_data = json.dumps(data, indent=4, ensure_ascii=False)
@@ -33,6 +34,7 @@ def insert_soup(url):
 
 
 # fmkorea
+# 10페이지
 def fm_crawling_function():
     home = "https://www.fmkorea.com"
     datas = [[] for _ in range(crl_page)]
@@ -81,11 +83,12 @@ def fm_crawling_function():
             )
 
         time.sleep(0.5)
-            
+
     return datas
 
 
 # ppomppu
+# 10페이지
 def pp_crawling_function():
     home = "https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu"
     datas = [[] for _ in range(crl_page)]
@@ -139,8 +142,11 @@ def pp_crawling_function():
             desc_div = in_soup.select_one("tr .board-contents")
             image_src_str = ""
             div_a_tags = desc_div.select("p img")
-            filtered_tags = [tag for tag in div_a_tags if len(tag["src"]) <= 450 
-                             and "clickWideIcon" not in tag.get("class", [])]
+            filtered_tags = [
+                tag
+                for tag in div_a_tags
+                if len(tag["src"]) <= 450 and "clickWideIcon" not in tag.get("class", [])
+            ]
             for tag in filtered_tags:
                 src = tag["src"]
                 image_src_str += src + "<br>"
@@ -174,36 +180,36 @@ def pp_crawling_function():
     return datas
 
 
-
+# quasarzone
+# 5페이지 이하만 사용(페이지 자체 로드 느림)
 def qz_crawling_function():
     home = "https://quasarzone.com"
-    datas = [[] for _ in range(crl_page)]
-    for page in range(0, crl_page):
+    datas = [[] for _ in range(int(crl_page / 2))]
+    for page in range(0, int(crl_page / 2)):
         soup = insert_soup(home + "/bbs/qb_saleinfo?page=" + str(page + 1))
         list_tags = soup.select("table tbody tr")
         # 게시판 링크+제목+금액+배송비+시간
         for link in list_tags:
             href = link.select_one(".market-info-list p a")["href"]
+            in_soup = insert_soup(home + href)
             bf_title = "".join(
-                link.select_one(".li h3 a").find_all(string=True, recursive=False)
+                in_soup.select_one("dl dt .title").find_all(string=True, recursive=False)
             ).strip()
-            title = re.sub(r"[\xa0\t]", "", bf_title)
-            info_texts = [a.text for a in link.select(".hotdeal_info span a")[1:3]]
-            category = link.select_one("div .category a").text
+            title = cleaned_content = re.sub(r"\[[^\]]+\]\s*", "", bf_title, count=1)
+            shop_url = in_soup.select_one(".market-info-view-table tr td a").text
+            board_price = in_soup.select_one(".market-info-view-table tr td span").text
+            tr = in_soup.find("th", string=re.compile("배송비"))
+            delivery_price = tr.find_next_sibling("td").get_text()
+            category = "".join(
+                in_soup.select_one(".left .ca_name").find_all(string=True, recursive=False)
+            ).strip()
             current_time = datetime.datetime.now()
             formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-            # 게시글 내부 이미지
-            in_soup = insert_soup("https://www.fmkorea.com" + href)
-            shop_url = in_soup.select_one("tr td .xe_content a").text
+            # 게시글 이미지
 
-            desc_div = in_soup.select_one("div article div")
-            image_src_str = ""
-            div_a_tags = desc_div.select("div > img, p > img")
-            for tag in div_a_tags:
-                src = tag["src"]
-                image_src_str += src + "<br>"
+            image_src_str = link.select_one(".market-info-list .maxImg")["src"]
 
-            if "hotdeal_var8Y" in link.select_one(".li h3 a")["class"]:
+            if "label done" in in_soup.select_one("div .title span")["class"]:
                 is_end_deal = True
             else:
                 is_end_deal = False
@@ -214,19 +220,18 @@ def qz_crawling_function():
                     "item_name": title,
                     "end_url": shop_url,
                     "clr_update_time": formatted_time,
-                    "board_price": info_texts[0],
+                    "board_price": board_price,
                     "board_description": image_src_str,
-                    "delivery_price": info_texts[1],
+                    "delivery_price": delivery_price,
                     "is_end_deal": is_end_deal,
                     "category": category,
                 }
             )
 
         time.sleep(0.5)
-            
+
     return datas
 
 
-
 # txt_write(qz_crawling_function().prettify())
-# json_write(pp_crawling_function())
+# json_write(qz_crawling_function())

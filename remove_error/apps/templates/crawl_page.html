@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crawl Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            color: #007BFF;
+        }
+
+        p {
+            font-size: 18px;
+        }
+        .main-link {
+            color: blue;
+            text-decoration: underline;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Crawling 완료</h1>
+    <p>{{ count }} 개의 레코드가 추가되었습니다.</p>
+    <p>{{ deleted_count }} 개의 레코드가 삭제되었습니다.</p>
+    <a href="{% url 'main' %}" class="main-link">Go to Main Page</a>
+</body>
+</html>

@@ -4,7 +4,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Items, Category
 from django.http import JsonResponse
 from django.db.models import Q
-from .crawl import fm_crawling_function
+from .crawl import fm_crawling_function, pp_crawling_function
 import openai
 from django.core.exceptions import ImproperlyConfigured
 
@@ -103,9 +103,11 @@ def main(request):
 # 크롤링 페이지
 def crawl_page(request):
     # 크롤링 수행 및 추가된 레코드 수 카운트
+
+    # fm_crawling_function
     result = fm_crawling_function()
     transposed_result = list(zip(*result))
-    count = 0
+    fm_count = 0
 
     for column in transposed_result:
         for data in column:
@@ -123,13 +125,32 @@ def crawl_page(request):
                     is_end_deal=data["is_end_deal"],
                     category=categorize_deals(data["category"]),
                 )
-                print("=======")
-                print(
-                    f"{data['item_name']} : {data['category']} : {categorize_deals(data['category'])}"
-                )
-                print("=======")
                 result_model.save()
-                count += 1
+                fm_count += 1
+
+    # pp_crawling_function
+    result = pp_crawling_function()
+    transposed_result = list(zip(*result))
+    pp_count = 0
+
+    for column in transposed_result:
+        for data in column:
+            if not Items.objects.filter(
+                Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+            ).exists():
+                result_model = Items(
+                    item_name=data["item_name"],
+                    end_url=data["end_url"],
+                    board_url=data["board_url"],
+                    clr_update_time=data["clr_update_time"],
+                    board_price="제목 참조",
+                    board_description=data["board_description"],
+                    delivery_price="제목 참조",
+                    is_end_deal=data["is_end_deal"],
+                    category=categorize_deals(data["category"]),
+                )
+                result_model.save()
+                pp_count += 1
 
     # is_end_deal이 True인 항목 삭제
     deleted_items = Items.objects.filter(is_end_deal=True)
@@ -137,7 +158,8 @@ def crawl_page(request):
     deleted_items.delete()
 
     context = {
-        "count": count,
+        "fm_count": fm_count,
+        "pp_count": pp_count,
         "deleted_count": deleted_count,
     }
 

@@ -11,6 +11,11 @@ from selenium.webdriver.common.by import By
 crl_page = 10
 
 
+def txt_write(data):
+    with open("page_html.txt", "w", encoding="utf-8") as file:
+        file.write(data)
+    subprocess.run(["start", "page_html.txt"], shell=True)  # Windows
+
 def json_write(data):
     json_data = json.dumps(data, indent=4, ensure_ascii=False)
     with open("page_data.json", "w", encoding="utf-8") as file:
@@ -32,99 +37,51 @@ def fm_crawling_function():
     home = "https://www.fmkorea.com"
     datas = [[] for _ in range(crl_page)]
     for page in range(0, crl_page):
-        if page == 0:
-            soup = insert_soup("https://www.fmkorea.com/hotdeal")
-            list_tags = soup.select("div.fm_best_widget > ul > li")
-            # 게시판 링크+제목+금액+배송비+시간
-            for link in list_tags:
-                href = link.select_one(".li h3 a")["href"]
-                bf_title = "".join(
-                    link.select_one(".li h3 a").find_all(string=True, recursive=False)
-                ).strip()
-                title = re.sub(r"[\xa0\t]", "", bf_title)
-                info_texts = [a.text for a in link.select(".hotdeal_info span a")[1:3]]
-                category = link.select_one("div .category a").text
-                current_time = datetime.datetime.now()
-                formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-                # 게시글 내부 이미지
-                in_soup = insert_soup("https://www.fmkorea.com" + href)
-                shop_url = in_soup.select_one("tr td .xe_content a").text
+        soup = insert_soup(home + "&page=" + str(page + 1))
+        list_tags = soup.select("div.fm_best_widget > ul > li")
+        # 게시판 링크+제목+금액+배송비+시간
+        for link in list_tags:
+            href = link.select_one(".li h3 a")["href"]
+            bf_title = "".join(
+                link.select_one(".li h3 a").find_all(string=True, recursive=False)
+            ).strip()
+            title = re.sub(r"[\xa0\t]", "", bf_title)
+            info_texts = [a.text for a in link.select(".hotdeal_info span a")[1:3]]
+            category = link.select_one("div .category a").text
+            current_time = datetime.datetime.now()
+            formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+            # 게시글 내부 이미지
+            in_soup = insert_soup("https://www.fmkorea.com" + href)
+            shop_url = in_soup.select_one("tr td .xe_content a").text
 
-                desc_div = in_soup.select_one("div article div")
-                image_src_str = ""
-                div_a_tags = desc_div.select("div > img, p > img")
-                for tag in div_a_tags:
-                    src = tag["src"]
-                    image_src_str += src + "<br>"
+            desc_div = in_soup.select_one("div article div")
+            image_src_str = ""
+            div_a_tags = desc_div.select("div > img, p > img")
+            for tag in div_a_tags:
+                src = tag["src"]
+                image_src_str += src + "<br>"
 
-                if "hotdeal_var8Y" in link.select_one(".li h3 a")["class"]:
-                    is_end_deal = True
-                else:
-                    is_end_deal = False
+            if "hotdeal_var8Y" in link.select_one(".li h3 a")["class"]:
+                is_end_deal = True
+            else:
+                is_end_deal = False
 
-                datas[page].append(
-                    {
-                        "board_url": home + href,
-                        "item_name": title,
-                        "end_url": shop_url,
-                        "clr_update_time": formatted_time,
-                        "board_price": info_texts[0],
-                        "board_description": image_src_str,
-                        "delivery_price": info_texts[1],
-                        "is_end_deal": is_end_deal,
-                        "category": category,
-                    }
-                )
+            datas[page].append(
+                {
+                    "board_url": home + href,
+                    "item_name": title,
+                    "end_url": shop_url,
+                    "clr_update_time": formatted_time,
+                    "board_price": info_texts[0],
+                    "board_description": image_src_str,
+                    "delivery_price": info_texts[1],
+                    "is_end_deal": is_end_deal,
+                    "category": category,
+                }
+            )
 
-            time.sleep(0.5)
-
-        else:
-            # 2페이지 부터
-            soup = insert_soup("https://www.fmkorea.com/hotdeal?page=" + str(page + 1))
-            list_tags = soup.select("div.fm_best_widget > ul > li")
-            # 게시판 링크+제목+금액+배송비+시간
-            for link in list_tags:
-                href = link.select_one(".li h3 a")["href"]
-                bf_title = "".join(
-                    link.select_one(".li h3 a").find_all(string=True, recursive=False)
-                ).strip()
-                title = re.sub(r"[\xa0\t]", "", bf_title)
-                info_texts = [a.text for a in link.select(".hotdeal_info span a")[1:3]]
-                category = link.select_one("div .category a").text
-                current_time = datetime.datetime.now()
-                formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-                # 게시글 내부 이미지
-                in_soup = insert_soup("https://www.fmkorea.com" + href)
-                shop_url = in_soup.select_one("tr td .xe_content a").text
-
-                desc_div = in_soup.select_one("div article div")
-                image_src_str = ""
-                div_a_tags = desc_div.select("div > img, p > img")
-                for tag in div_a_tags:
-                    src = tag["src"]
-                    image_src_str += src + "<br>"
-
-                if "hotdeal_var8Y" in link.select_one(".li h3 a")["class"]:
-                    is_end_deal = True
-                else:
-                    is_end_deal = False
-
-                datas[page].append(
-                    {
-                        "board_url": home + href,
-                        "item_name": title,
-                        "end_url": shop_url,
-                        "clr_update_time": formatted_time,
-                        "board_price": info_texts[0],
-                        "board_description": image_src_str,
-                        "delivery_price": info_texts[1],
-                        "is_end_deal": is_end_deal,
-                        "category": category,
-                    }
-                )
-
-            time.sleep(0.5)
-
+        time.sleep(0.5)
+            
     return datas
 
 
@@ -181,8 +138,9 @@ def pp_crawling_function():
             # 게시글 내부 이미지
             desc_div = in_soup.select_one("tr .board-contents")
             image_src_str = ""
-            div_a_tags = desc_div.select("p > img")
-            filtered_tags = [tag for tag in div_a_tags if len(tag["src"]) <= 450]
+            div_a_tags = desc_div.select("p img")
+            filtered_tags = [tag for tag in div_a_tags if len(tag["src"]) <= 450 
+                             and "clickWideIcon" not in tag.get("class", [])]
             for tag in filtered_tags:
                 src = tag["src"]
                 image_src_str += src + "<br>"
@@ -216,5 +174,59 @@ def pp_crawling_function():
     return datas
 
 
-# pp_crawling_function()
-# json_write(fm_crawling_function())
+
+def qz_crawling_function():
+    home = "https://quasarzone.com"
+    datas = [[] for _ in range(crl_page)]
+    for page in range(0, crl_page):
+        soup = insert_soup(home + "/bbs/qb_saleinfo?page=" + str(page + 1))
+        list_tags = soup.select("table tbody tr")
+        # 게시판 링크+제목+금액+배송비+시간
+        for link in list_tags:
+            href = link.select_one(".market-info-list p a")["href"]
+            bf_title = "".join(
+                link.select_one(".li h3 a").find_all(string=True, recursive=False)
+            ).strip()
+            title = re.sub(r"[\xa0\t]", "", bf_title)
+            info_texts = [a.text for a in link.select(".hotdeal_info span a")[1:3]]
+            category = link.select_one("div .category a").text
+            current_time = datetime.datetime.now()
+            formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+            # 게시글 내부 이미지
+            in_soup = insert_soup("https://www.fmkorea.com" + href)
+            shop_url = in_soup.select_one("tr td .xe_content a").text
+
+            desc_div = in_soup.select_one("div article div")
+            image_src_str = ""
+            div_a_tags = desc_div.select("div > img, p > img")
+            for tag in div_a_tags:
+                src = tag["src"]
+                image_src_str += src + "<br>"
+
+            if "hotdeal_var8Y" in link.select_one(".li h3 a")["class"]:
+                is_end_deal = True
+            else:
+                is_end_deal = False
+
+            datas[page].append(
+                {
+                    "board_url": home + href,
+                    "item_name": title,
+                    "end_url": shop_url,
+                    "clr_update_time": formatted_time,
+                    "board_price": info_texts[0],
+                    "board_description": image_src_str,
+                    "delivery_price": info_texts[1],
+                    "is_end_deal": is_end_deal,
+                    "category": category,
+                }
+            )
+
+        time.sleep(0.5)
+            
+    return datas
+
+
+
+# txt_write(qz_crawling_function().prettify())
+# json_write(pp_crawling_function())

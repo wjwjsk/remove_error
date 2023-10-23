@@ -37,7 +37,7 @@ def fm_crawling_function():
     home = "https://www.fmkorea.com"
     datas = [[] for _ in range(crl_page)]
     for page in range(0, crl_page):
-        soup = insert_soup(home + "&page=" + str(page + 1))
+        soup = insert_soup(home + "/index?mid=hotdeal&page=" + str(page + 1))
         list_tags = soup.select("div.fm_best_widget > ul > li")
         # 게시판 링크+제목+금액+배송비+시간
         for link in list_tags:

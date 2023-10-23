@@ -9,26 +9,26 @@ import openai
 from django.core.exceptions import ImproperlyConfigured
 
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# secrets.json 파일의 경로를 계산합니다.
-secret_file = os.path.join(BASE_DIR, "..", "config.json")
+# # secrets.json 파일의 경로를 계산합니다.
+# secret_file = os.path.join(BASE_DIR, "config.json")
 
-with open(secret_file) as f:
-    secrets = json.loads(f.read())
-
-
-def get_secret(setting, secrets=secrets):
-    try:
-        return secrets[setting]
-    except KeyError:
-        error_msg = "Set the {} environment variable".format(setting)
-        raise ImproperlyConfigured(error_msg)
-
-    # OpenAI API 키 설정
+# with open(secret_file) as f:
+#     secrets = json.loads(f.read())
 
 
-openai.api_key = get_secret("openai_api_key")
+# def get_secret(setting, secrets=secrets):
+#     try:
+#         return secrets[setting]
+#     except KeyError:
+#         error_msg = "Set the {} environment variable".format(setting)
+#         raise ImproperlyConfigured(error_msg)
+
+#     # OpenAI API 키 설정
+
+
+# openai.api_key = get_secret("openai_api_key")
 # for i in range(3):
 #     product_title = items[i].item_name
 

@@ -1,16 +1,95 @@
+import json
+import os
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Items, Category
 from django.http import JsonResponse
 from django.db.models import Q
-from .crawl import fm_crawling_function
-from .clien import clien_crawling_function
-from django.utils import timezone
+from .crawl import fm_crawling_function, pp_crawling_function
+import openai
+from django.core.exceptions import ImproperlyConfigured
 
 
-# 메인 페이지
+# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# # secrets.json 파일의 경로를 계산합니다.
+# secret_file = os.path.join(BASE_DIR, "config.json")
+
+# with open(secret_file) as f:
+#     secrets = json.loads(f.read())
+
+
+# def get_secret(setting, secrets=secrets):
+#     try:
+#         return secrets[setting]
+#     except KeyError:
+#         error_msg = "Set the {} environment variable".format(setting)
+#         raise ImproperlyConfigured(error_msg)
+
+#     # OpenAI API 키 설정
+
+
+# openai.api_key = get_secret("openai_api_key")
+# for i in range(3):
+#     product_title = items[i].item_name
+
+#     response = openai.ChatCompletion.create(
+#         model="gpt-3.5-turbo",
+#         messages=[
+#             {"role": "system", "content": "You are a helpful assistant."},
+#             {
+#                 "role": "user",
+#                 "content": f"이 상품의 주요 카테고리는 무엇인가요? 최대한 짧게 카테고리만 대답하세요. {product_title}은(는) ",
+#             },
+#         ],
+#     )
+
+#     category = response["choices"][0]["message"]["content"].strip()
+#     print(f"{product_title} 카테고리: {category}")
+
+
+#  1. 먹거리
+# 2. SW/게임
+# 3. PC제품
+# 4. 가전제품
+# 5. 생활용품
+# 6. 의류
+# 7. 세일정보
+# 8. 화장품
+# 9. 모바일/상품권
+# 10. 패키지/이용권
+# 11. 기타
+# 12. 해외핫딜
+def categorize_deals(category):
+    if category == "PC제품" or category == "가전제품":
+        return Category.objects.get(name="전자제품 및 가전제품")
+
+    elif category == "의류":
+        return Category.objects.get(name="의류 및 패션")
+
+    elif category == "먹거리":
+        return Category.objects.get(name="식품 및 식료품")
+
+    elif category == "생활용품":
+        return Category.objects.get(name="홈 및 가든")
+
+    elif category == "패키지/이용권":
+        return Category.objects.get(name="여행 및 숙박")
+
+    elif category == "화장품":
+        return Category.objects.get(name="뷰티 및 화장품")
+
+    elif category == "SW/게임":
+        return Category.objects.get(name="스포츠 및 액티비티")
+
+    elif category == "세일정보" or category == "모바일/상품권" or category == "기타" or category == "해외핫딜":
+        return Category.objects.get(name="기타")
+
+    return Category.objects.get(name="기타")
+
+
 def main(request):
-    items = Items.objects.all()[:10]
-    # 너무 많아서 우선 10개만
+    items = Items.objects.all()
+
     categories = Category.objects.all()
 
     context = {
@@ -18,39 +97,74 @@ def main(request):
         "categories": categories,
     }
 
-    # 해당 내용 주석 해제 후 새로고침시 db에 크롤링 데이터 추가됩니다(같은내용도 추가되므로 추후 수정필요)
+    return render(request, "index.html", context)
+
+
+# 크롤링 페이지
+def crawl_page(request):
+    # 크롤링 수행 및 추가된 레코드 수 카운트
+
+    # fm_crawling_function
     result = fm_crawling_function()
-# 전치 수행
     transposed_result = list(zip(*result))
+    fm_count = 0
 
     for column in transposed_result:
         for data in column:
-            # 전달받은 데이터를 ResultModel에 매핑하여 저장합니다.
-            result_model = Items(
-                board_url=data['board_url'],
-                item_name=data['item_name'],
-                end_url=data['end_url'],
-                clr_update_time=data['clr_update_time'],
-                board_price=data['board_price'],
-                board_description=data['board_description'],
-                delivery_price=data['delivery_price'],
-                is_end_deal=data['is_end_deal'],
-            )
-            result_model.save()
+            if not Items.objects.filter(
+                Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+            ).exists():
+                result_model = Items(
+                    item_name=data["item_name"],
+                    end_url=data["end_url"],
+                    board_url=data["board_url"],
+                    clr_update_time=data["clr_update_time"],
+                    board_price=data["board_price"],
+                    board_description=data["board_description"],
+                    delivery_price=data["delivery_price"],
+                    is_end_deal=data["is_end_deal"],
+                    category=categorize_deals(data["category"]),
+                )
+                result_model.save()
+                fm_count += 1
 
-    result_clien=clien_crawling_function()
-     
-    for data in result_clien:
-       item, created=Items.objects.update_or_create(
-           board_url=data['board_url'], 
-           defaults={
-               'item_name':data['item_name'], 
-               'board_description':data["board_description"],
-               'clr_update_time':data['clr_update_time'],
-            }
-        )
-       
-    return render(request, "index.html", context)
+    # pp_crawling_function
+    result = pp_crawling_function()
+    transposed_result = list(zip(*result))
+    pp_count = 0
+
+    for column in transposed_result:
+        for data in column:
+            if not Items.objects.filter(
+                Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+            ).exists():
+                result_model = Items(
+                    item_name=data["item_name"],
+                    end_url=data["end_url"],
+                    board_url=data["board_url"],
+                    clr_update_time=data["clr_update_time"],
+                    board_price="제목 참조",
+                    board_description=data["board_description"],
+                    delivery_price="제목 참조",
+                    is_end_deal=data["is_end_deal"],
+                    category=categorize_deals(data["category"]),
+                )
+                result_model.save()
+                pp_count += 1
+
+    # is_end_deal이 True인 항목 삭제
+    deleted_items = Items.objects.filter(is_end_deal=True)
+    deleted_count = deleted_items.count()
+    deleted_items.delete()
+
+    context = {
+        "fm_count": fm_count,
+        "pp_count": pp_count,
+        "deleted_count": deleted_count,
+    }
+
+    # crawl_page.html 템플릿 렌더링
+    return render(request, "crawl_page.html", context)
 
 
 # 상세 페이지
@@ -89,7 +203,7 @@ def search(request):
     if query:
         results = Items.objects.filter(
             Q(item_name__icontains=query)
-            | Q(board_desciption__icontains=query)
+            | Q(board_description__icontains=query)
             | Q(category__name__icontains=query)
         )
         categories_in_results = Category.objects.filter(items__in=results).distinct()
@@ -104,3 +218,7 @@ def search(request):
             "categories": Category.objects.all(),
         }
     return render(request, "index.html", context)
+
+
+def detail(request):
+    return render(request, "detail.html")

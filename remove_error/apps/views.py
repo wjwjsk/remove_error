@@ -60,28 +60,28 @@ openai.api_key = get_secret("openai_api_key")
 # 11. 기타
 # 12. 해외핫딜
 def categorize_deals(category):
-    if category == "PC제품" or category == "가전제품":
+    if category in ["PC제품", "가전제품", "컴퓨터", "디지털"]:
         return Category.objects.get(name="전자제품 및 가전제품")
 
-    elif category == "의류":
+    elif category in ["의류", "의류/잡화"]:
         return Category.objects.get(name="의류 및 패션")
 
-    elif category == "먹거리":
+    elif category in ["먹거리", "식품/건강"]:
         return Category.objects.get(name="식품 및 식료품")
 
-    elif category == "생활용품":
+    elif category in ["생활용품", "가전/가구"]:
         return Category.objects.get(name="홈 및 가든")
 
-    elif category == "패키지/이용권":
+    elif category in ["패키지/이용권", "상품권"]:
         return Category.objects.get(name="여행 및 숙박")
 
-    elif category == "화장품":
+    elif category in ["화장품"]:
         return Category.objects.get(name="뷰티 및 화장품")
 
-    elif category == "SW/게임":
+    elif category in ["SW/게임", "등산/캠핑"]:
         return Category.objects.get(name="스포츠 및 액티비티")
 
-    elif category == "세일정보" or category == "모바일/상품권" or category == "기타" or category == "해외핫딜":
+    elif category in ["세일정보", "모바일/상품권", "기타", "해외핫딜"]:
         return Category.objects.get(name="기타")
 
     return Category.objects.get(name="기타")
@@ -223,6 +223,6 @@ def search(request):
 def detail(request):
     return render(request, "detail.html")
 
-def main_ex1(request):
-    return render(request, "main_ex1.html", )
 
+def main_ex1(request):
+    return render(request, "main_ex1.html")

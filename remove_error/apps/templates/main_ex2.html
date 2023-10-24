@@ -175,33 +175,34 @@
                         </div>
                     </div>
                     <div class="candidate-list">
+                        {% for item in items %}
                         <div class="candidate-list-box card mt-4">
                             <div class="p-4 card-body">
                                 <div class="align-items-center row">
                                     <div class="col-auto">
                                         <div class="candidate-list-images">
-                                            <a href="#"><img src="https://bootdey.com/img/Content/avatar/avatar1.png"
-                                                    alt class="avatar-md img-thumbnail rounded-circle" /></a>
+                                            <a href="#"><img src="{{ item.image_url }}"
+                                                alt="{{ item.item_name }}" class="avatar-md img-thumbnail rounded-circle" /></a>
                                         </div>
                                     </div>
                                     <div class="col-lg-5">
                                         <div class="candidate-list-content mt-3 mt-lg-0">
                                             <h5 class="fs-19 mb-0">
-                                                <a class="primary-link" href="#">노브랜드 버거 4종류 20% 할인</a><span
+                                                <a class="primary-link" href="#">{{ item.item_name }}</a><span
                                                     class="badge bg-success ms-1"><i
-                                                        class="mdi mdi-star align-middle"></i>4.8</span>
+                                                        class="mdi mdi-star align-middle"></i>{{ item.rating }}</span>
                                             </h5>
-                                            <p class="text-muted mb-2">당근피클오이</p>
+                                            <p class="text-muted mb-2">{{ item.description }}</p>
                                             <ul class="list-inline mb-0 text-muted">
-                                                <li class="list-inline-item"><i class="mdi mdi-wallet"></i>가격
-                                                </li>
+                                                <li class="list-inline-item"><i class="mdi mdi-wallet"></i>가격: {{ item.board_price }}</li>
                                             </ul>
                                         </div>
                                     </div>
                                     <div class="col-lg-4">
                                         <div class="mt-2 mt-lg-0 d-flex flex-wrap align-items-start gap-1">
-                                            <span class="badge bg-soft-secondary fs-14 mt-1">G마켓</span><span
-                                                class="badge bg-soft-secondary fs-14 mt-1">뽐뿌</span>
+                                            {% for category in item.categories.all %}
+                                            <span class="badge bg-soft-secondary fs-14 mt-1">{{ category.name }}</span>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                 </div>
@@ -210,95 +211,40 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="candidate-list-box bookmark-post card mt-4">
-                            <div class="p-4 card-body">
-                                <div class="align-items-center row">
-                                    <div class="col-auto">
-                                        <div class="candidate-list-images">
-                                            <a href="#"><img src="https://bootdey.com/img/Content/avatar/avatar2.png"
-                                                    alt class="avatar-md img-thumbnail rounded-circle" /></a>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-5">
-                                        <div class="candidate-list-content mt-3 mt-lg-0">
-                                            <h5 class="fs-19 mb-0">
-                                                <a class="primary-link" href="#">오케이몰 Y3 히코 화이트 재입고</a><span
-                                                    class="badge bg-warning ms-1"><i
-                                                        class="mdi mdi-star align-middle"></i>3.4</span>
-                                            </h5>
-                                            <p class="text-muted mb-2">마마마맘</p>
-                                            <ul class="list-inline mb-0 text-muted">
-                                                <li class="list-inline-item"><i class="mdi mdi-wallet"></i>가격
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4">
-                                        <div class="mt-2 mt-lg-0 d-flex flex-wrap align-items-start gap-1"><span
-                                                class="badge bg-soft-secondary fs-14 mt-1">어미새</span></div>
-                                    </div>
-                                </div>
-                                <div class="favorite-icon">
-                                    <a href="#"><i class="mdi mdi-heart fs-18"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="candidate-list-box card mt-4">
-                            <div class="p-4 card-body">
-                                <div class="align-items-center row">
-                                    <div class="col-auto">
-                                        <div class="candidate-list-images">
-                                            <a href="#"><img src="https://bootdey.com/img/Content/avatar/avatar3.png"
-                                                    alt class="avatar-md img-thumbnail rounded-circle" /></a>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-5">
-                                        <div class="candidate-list-content mt-3 mt-lg-0">
-                                            <h5 class="fs-19 mb-0">
-                                                <a class="primary-link" href="#">고메 소바바치 소이허니 순살 3개</a><span
-                                                    class="badge bg-success ms-1"><i
-                                                        class="mdi mdi-star align-middle"></i>4.3</span>
-                                            </h5>
-                                            <p class="text-muted mb-2">사용자</p>
-                                            <ul class="list-inline mb-0 text-muted">
-                                                <li class="list-inline-item"><i class="mdi mdi-wallet"></i>가격
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4">
-                                        <div class="mt-2 mt-lg-0 d-flex flex-wrap align-items-start gap-1"><span
-                                                class="badge bg-soft-secondary fs-14 mt-1">어미새</span></div>
-                                    </div>
-                                </div>
-                                <div class="favorite-icon">
-                                    <a href="#"><i class="mdi mdi-heart fs-18"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                        
+                        {% endfor %}
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="mt-4 pt-2 col-lg-12">
                     <nav aria-label="Page navigation example">
-                        <div class="pagination job-pagination mb-0 justify-content-center">
-                            <li class="page-item disabled">
-                                <a class="page-link" tabindex="-1" href="#"><i
-                                        class="mdi mdi-chevron-double-left fs-15"></i></a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item"><a class="page-link" href="#">4</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#"><i class="mdi mdi-chevron-double-right fs-15"></i></a>
-                            </li>
-                        </div>
+                        <ul class="pagination job-pagination mb-0 justify-content-center">
+                            {% if items.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1"><i class="mdi mdi-chevron-double-left fs-15"></i></a>
+                                </li>
+                            {% endif %}
+            
+                            <!-- 수정된 부분: 페이지 범위 내에서만 페이지 번호를 반복하여 표시 -->
+                            {% for num in items.paginator.page_range %}
+                                {% if num >= start_page and num <= end_page %}
+                                    <li class="page-item {% if items.number == num %}active{% endif %}">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+            
+                            {% if items.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ items.paginator.num_pages }}"><i class="mdi mdi-chevron-double-right fs-15"></i></a>
+                                </li>
+                            {% endif %}
+                        </ul>
                     </nav>
                 </div>
             </div>
+            
+            
         </div>
     </section>
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>

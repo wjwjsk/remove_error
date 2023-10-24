@@ -10,4 +10,6 @@ urlpatterns = [
     path("detail/", views.detail, name="detail"),
     path("crawl/", views.crawl_page, name="crawl_page"),
     path("main_ex1/", views.main_ex1, name="main_ex1"),
+    path("main_ex2/", views.main_ex2, name="main_ex2"),
+    path("load-more-items/", views.load_more_items, name="load_more_items"),
 ]

@@ -114,7 +114,7 @@ def crawl_page(request):
             if not Items.objects.filter(
                 Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
             ).exists():
-                if data["is_end_deal"] == "False" or data["is_end_deal"] == "false":
+                if data["is_end_deal"] == False:
                     result_model = Items(
                         item_name=data["item_name"],
                         end_url=data["end_url"],
@@ -152,7 +152,7 @@ def crawl_page(request):
             if not Items.objects.filter(
                 Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
             ).exists():
-                if data["is_end_deal"] == "False" or data["is_end_deal"] == "false":
+                if data["is_end_deal"] == False:
                     result_model = Items(
                         item_name=data["item_name"],
                         end_url=data["end_url"],

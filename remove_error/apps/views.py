@@ -13,6 +13,7 @@ from .crawl import (
 import openai
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import timezone
+from django.core.paginator import Paginator, EmptyPage
 
 
 # BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -332,4 +333,53 @@ def detail(request):
 
 
 def main_ex1(request):
-    return render(request, "main_ex1.html")
+    results = Items.objects.all()[:8]
+    categories_in_results = Category.objects.filter(items__in=results).distinct()
+
+    for item in results:
+        board_description = item.board_description
+        image_urls = board_description.split("<br>")
+        item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
+
+    context = {
+        "items": results,
+        "categories": categories_in_results,
+    }
+
+    return render(request, "main_ex1.html", context)
+
+
+def main_ex2(request):
+    results = Items.objects.all()
+    categories_in_results = Category.objects.filter(items__in=results).distinct()
+
+    for item in results:
+        board_description = item.board_description
+        image_urls = board_description.split("<br>")
+        item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
+
+    paginator = Paginator(results, 8)  # 페이지당 10개 아이템 표시, 이 숫자를 원하는대로 수정 가능
+
+    page = request.GET.get("page")
+
+    try:
+        items = paginator.get_page(page)
+    except EmptyPage:
+        items = paginator.get_page(1)  # 페이지가 없을 경우 첫 번째 페이지로 돌아감
+
+    # 페이지 번호를 한 번에 5개만 보이도록 설정
+    displayed_page_range = 5
+    current_page = items.number
+    total_pages = paginator.num_pages
+
+    # 페이지 범위 계산
+    start_page = max(1, current_page - displayed_page_range // 2)
+    end_page = min(total_pages, start_page + displayed_page_range - 1)
+
+    context = {
+        "items": items,
+        "categories": categories_in_results,
+        "start_page": start_page,
+        "end_page": end_page,
+    }
+    return render(request, "main_ex2.html", context)

@@ -88,7 +88,7 @@ def fm_crawling_function():
     return datas
 
 
-# ppomppu
+# ppomppu(selenium)
 # 10페이지
 def pp_crawling_function():
     home = "https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu"
@@ -191,29 +191,43 @@ def qz_crawling_function():
         list_tags = soup.select("table tbody tr")
         # 게시판 링크+제목+금액+배송비+시간
         for link in list_tags:
-            href = link.select_one(".market-info-list p a")["href"]
-            in_soup = insert_soup(home + href)
-            bf_title = "".join(
-                in_soup.select_one("dl dt .title").find_all(string=True, recursive=False)
-            ).strip()
-            title = cleaned_content = re.sub(r"\[[^\]]+\]\s*", "", bf_title, count=1)
-            shop_url = in_soup.select_one(".market-info-view-table tr td a").text
-            board_price = in_soup.select_one(".market-info-view-table tr td span").text
-            tr = in_soup.find("th", string=re.compile("배송비"))
-            delivery_price = tr.find_next_sibling("td").get_text()
-            category = "".join(
-                in_soup.select_one(".left .ca_name").find_all(string=True, recursive=False)
-            ).strip()
-            current_time = datetime.datetime.now()
-            formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-            # 게시글 이미지
+            fa_lock = link.select_one(".fa-lock")
+            if fa_lock is None or fa_lock.text not in "블라인드":
+                href = link.select_one(".market-info-list p a")["href"]
+                in_soup = insert_soup(home + href)
+                bf_title = "".join(
+                    in_soup.select_one("dl dt .title").find_all(string=True, recursive=False)
+                ).strip()
+                title = re.sub(r"\[[^\]]+\]\s*", "", bf_title, count=1)
+                shop_url = in_soup.select_one(".market-info-view-table tr td a").text
+                board_price = in_soup.select_one(".market-info-view-table tr td span").text
+                tr = in_soup.find("th", string=re.compile("배송비"))
+                delivery_price = tr.find_next_sibling("td").get_text()
+                category = "".join(
+                    in_soup.select_one(".left .ca_name").find_all(string=True, recursive=False)
+                ).strip()
+                current_time = datetime.datetime.now()
+                formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                # 게시글 이미지
 
-            image_src_str = link.select_one(".market-info-list .maxImg")["src"]
+                image_src_str = link.select_one(".market-info-list .maxImg")["src"]
 
-            if "label done" in in_soup.select_one("div .title span")["class"]:
-                is_end_deal = True
+                if "label done" in in_soup.select_one("div .title span")["class"]:
+                    is_end_deal = True
+                else:
+                    is_end_deal = False
             else:
-                is_end_deal = False
+                is_end_deal = True
+                href = link.select_one(".market-info-list p a")["href"]
+                title = "블라인드 게시글"
+                shop_url = "블라인드 게시글"
+                formatted_time = "블라인드 게시글"
+                current_time = datetime.datetime.now()
+                formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                board_price = "블라인드 게시글"
+                image_src_str = "블라인드 게시글"
+                delivery_price = "블라인드 게시글"
+                category = "블라인드 게시글"
 
             datas[page].append(
                 {
@@ -229,12 +243,13 @@ def qz_crawling_function():
                 }
             )
 
-        time.sleep(0.5)
+            time.sleep(0.5)
 
     return datas
 
 
 # arcalive
+# 10페이지
 def al_crawling_function():
     home = "https://arca.live"
     datas = [[] for _ in range(crl_page)]
@@ -246,9 +261,7 @@ def al_crawling_function():
             href = link.select_one(".title.hybrid-title")["href"]
             in_soup = insert_soup(home + href)
             category = in_soup.select_one(".badge.badge-success.category-badge").text
-            shop_url = in_soup.select_one(
-                "table tbody > tr:nth-child(1) > td:nth-child(2) a"
-            ).text
+            shop_url = in_soup.select_one("table tbody > tr:nth-child(1) > td:nth-child(2) a").text
             bf_title = in_soup.select_one(
                 "table tbody > tr:nth-child(3) > td:nth-child(2) span"
             ).text
@@ -292,10 +305,78 @@ def al_crawling_function():
     return datas
 
 
+# coolenjoy
+# 10페이지
+def ce_crawling_function():
+    home = "https://coolenjoy.net"
+    datas = [[] for _ in range(crl_page)]
+    for page in range(0, crl_page):
+        soup = insert_soup(home + "/bbs/jirum?page=" + str(page + 1))
+        list_tags = soup.select(".na-table.d-md-table.w-100 li")
+        # 게시판 링크+제목+금액+배송비+시간
+        for link in list_tags:
+            blind = link.select_one(".na-item a")
+            if blind is None or not any(filter(lambda word: word == "블라인드", blind.text.split())):
+                href = link.select_one(".na-subject")["href"]
+                category = link.select_one("#abcd").text
+                board_price = link.select_one("div:nth-child(3) font").text
+                in_soup = insert_soup(href)
+                bf_shop_url = re.findall(r'(https?://[^\s]+)', in_soup.select_one(
+                    ".d-flex.my-1 > .pl-3.flex-grow-1.text-break-all a").text)
+                shop_url = bf_shop_url[0]
+
+                bf_title = in_soup.select_one("h1#bo_v_title").text.split()
+                title = ' '.join(bf_title[4:])
+                current_time = datetime.datetime.now()
+                formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                # 게시글 이미지
+                image_src_str = ""
+                div_src_str = in_soup.select(".view-content.fr-view p img, .view-content.fr-view a img")
+                for tag in div_src_str:
+                    src = tag["src"]
+                    image_src_str += src + "<br>"
+
+                if "종료된" in in_soup.select_one("#bo_v_atc b").text.split():
+                    is_end_deal = True
+                else:
+                    is_end_deal = False
+
+            else:
+                is_end_deal = True
+                href = link.select_one(".na-subject")["href"]
+                title = "블라인드 게시글"   
+                shop_url = "블라인드 게시글"
+                formatted_time = "블라인드 게시글"
+                current_time = datetime.datetime.now()
+                formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                board_price = "블라인드 게시글"
+                image_src_str = "블라인드 게시글"
+                category = "블라인드 게시글"
+
+            datas[page].append(
+                {
+                    "board_url": href,
+                    "item_name": title,
+                    "end_url": shop_url,
+                    "clr_update_time": formatted_time,
+                    "board_price": board_price,
+                    "board_description": image_src_str,
+                    "delivery_price": "본문참조",
+                    "is_end_deal": is_end_deal,
+                    "category": category,
+                }
+            )
+
+            time.sleep(0.5)
+                
+
+    return datas
+
+
 ## 해당url html 확인
-# url = "https://arca.live/b/hotdeal/89502637?p=1"
+# url = "https://coolenjoy.net/bbs/jirum/2471187"
 # txt_write(url)
 
 
 ## 크롤링 데이터확인
-# json_write(al_crawling_function())
+# json_write(ce_crawling_function())

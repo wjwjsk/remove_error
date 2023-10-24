@@ -11,9 +11,18 @@ from selenium.webdriver.common.by import By
 crl_page = 10
 
 
-def txt_write(data):
+# HTML 페이지 soup에 담기
+def insert_soup(url):
+    response = requests.get(url)
+    html = response.text
+    soup = BeautifulSoup(html, "html.parser")
+    return soup
+
+
+def txt_write(url):
+    soup = insert_soup(url)
     with open("page_html.txt", "w", encoding="utf-8") as file:
-        file.write(data)
+        file.write(soup.prettify())
     subprocess.run(["start", "page_html.txt"], shell=True)  # Windows
 
 
@@ -22,15 +31,7 @@ def json_write(data):
     with open("page_data.json", "w", encoding="utf-8") as file:
         file.write(json_data)
     subprocess.run(["start", "page_data.json"], shell=True)  # Windows
-    # subprocess.run(["open", "page_html.txt"])  # macOS
-
-
-# HTML 페이지 soup에 담기
-def insert_soup(url):
-    response = requests.get(url)
-    html = response.text
-    soup = BeautifulSoup(html, "html.parser")
-    return soup
+    # subprocess.run(["open", "page_data.json"])  # macOS
 
 
 # fmkorea
@@ -233,5 +234,68 @@ def qz_crawling_function():
     return datas
 
 
-# txt_write(qz_crawling_function().prettify())
-# json_write(qz_crawling_function())
+# arcalive
+def al_crawling_function():
+    home = "https://arca.live"
+    datas = [[] for _ in range(crl_page)]
+    for page in range(0, crl_page):
+        soup = insert_soup(home + "/b/hotdeal?p=" + str(page + 1))
+        list_tags = soup.select(".article-list .list-table.hybrid .vrow.hybrid")
+        # 게시판 링크+제목+금액+배송비+시간
+        for link in list_tags:
+            href = link.select_one(".title.hybrid-title")["href"]
+            in_soup = insert_soup(home + href)
+            category = in_soup.select_one(".badge.badge-success.category-badge").text
+            shop_url = in_soup.select_one(
+                "table tbody > tr:nth-child(1) > td:nth-child(2) a"
+            ).text
+            bf_title = in_soup.select_one(
+                "table tbody > tr:nth-child(3) > td:nth-child(2) span"
+            ).text
+            title = re.sub(r"\[[^\]]+\]\s*", "", bf_title.strip(), count=1)
+            board_price = in_soup.select_one(
+                "table tbody > tr:nth-child(4) > td:nth-child(2) span"
+            ).text.strip()
+            delivery_price = in_soup.select_one(
+                "table tbody > tr:nth-child(5) > td:nth-child(2) span"
+            ).text.strip()
+            current_time = datetime.datetime.now()
+            formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+            # 게시글 이미지
+            image_src_str = ""
+            div_src_str = in_soup.select(".fr-view.article-content p img")
+            for tag in div_src_str:
+                src = tag["src"]
+                image_src_str += src + "<br>"
+
+            if "close-deal" in in_soup.select_one(".title-row .title")["class"]:
+                is_end_deal = True
+            else:
+                is_end_deal = False
+
+            datas[page].append(
+                {
+                    "board_url": home + href,
+                    "item_name": title,
+                    "end_url": shop_url,
+                    "clr_update_time": formatted_time,
+                    "board_price": board_price,
+                    "board_description": image_src_str,
+                    "delivery_price": delivery_price,
+                    "is_end_deal": is_end_deal,
+                    "category": category,
+                }
+            )
+
+        time.sleep(0.5)
+
+    return datas
+
+
+## 해당url html 확인
+# url = "https://arca.live/b/hotdeal/89502637?p=1"
+# txt_write(url)
+
+
+## 크롤링 데이터확인
+# json_write(al_crawling_function())

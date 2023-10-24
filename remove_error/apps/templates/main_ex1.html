@@ -182,5 +182,66 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
         <!-- Core theme JS-->
         <script src="js/scripts.js"></script>
+        <script>
+            var page = 2;  // 현재 페이지 번호
+            var loading = false;  // 새로운 아이템을 로딩 중인지 여부
+        
+            function loadMoreItems() {
+                if (loading) {
+                    return;  // 이미 로딩 중이면 중복 로딩 방지
+                }
+        
+                // 로딩 시작
+                loading = true;
+                
+                // AJAX 또는 Fetch를 사용하여 서버에서 새로운 아이템을 가져오는 요청을 보냄
+                var url = "{% url 'load_more_items' %}?page=" + page;
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.items.length > 0) {
+                            page++;
+                            data.items.forEach(item => {
+                                // 가져온 아이템을 HTML에 추가
+                                var itemHtml = `
+                                    <div class="col mb-5">
+                                        <div class="card h-100">
+                                            <img class="card-img-top" src="${item.image_url}" alt="${item.item_name}" />
+                                            <div class="card-body p-4">
+                                                <div class="text-center">
+                                                    <h5 class="fw-bolder">${item.item_name}</h5>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="#">View details</a></div>
+                                            </div>
+                                        </div>
+                                    </div>`;
+                                var itemElement = document.createElement("div");
+                                itemElement.innerHTML = itemHtml;
+                                document.querySelector(".row").appendChild(itemElement);
+                            });
+                        } else {
+                            // 더 이상 아이템이 없을 경우 로딩 중지
+                            loading = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error loading more items:", error);
+                        loading = false;
+                    });
+            }
+        
+            // 스크롤 이벤트 감지
+            window.addEventListener("scroll", () => {
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+                    // 스크롤이 아래로 내려갔을 때, 새로운 아이템 로딩 시작
+                    loadMoreItems();
+                }
+            });
+        
+            // 페이지 로딩 시 초기 아이템 로딩
+            loadMoreItems();
+        </script>
     </body>
 </html>

@@ -349,6 +349,27 @@ def main_ex1(request):
     return render(request, "main_ex1.html", context)
 
 
+def load_more_items(request):
+    page = int(request.GET.get("page", 2))  # 기본 페이지 번호는 2로 설정
+    items_per_page = 8  # 페이지당 표시할 아이템 수
+
+    start = (page - 1) * items_per_page
+    end = page * items_per_page
+
+    results = Items.objects.all()[start:end]
+
+    # results에 이미지 URL을 추가
+    for item in results:
+        board_description = item.board_description
+        image_urls = board_description.split("<br>")
+        item.image_url = image_urls[0] if image_urls else ""
+
+    # items를 JSON으로 반환
+    item_data = [{"image_url": item.image_url, "item_name": item.item_name} for item in results]
+
+    return JsonResponse({"items": item_data})
+
+
 def main_ex2(request):
     results = Items.objects.all()
     categories_in_results = Category.objects.filter(items__in=results).distinct()

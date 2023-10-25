@@ -190,13 +190,22 @@
             var page = 2;  // 시작 페이지 번호
             var maxPages = {{ max_pages }};  // 전체 페이지 수, Django에서 전달받아야 함
             var loadingImage = "{% static 'images/loading.gif' %}";  // 로딩 이미지 경로를 수정하세요
-        
+
             function loadMoreItems() {
                 if (page <= maxPages && !isLoading) {
                     isLoading = true;
                     // 로딩 이미지를 보여줄 수 있음
-        
-                    $.get("{% url 'load_more_items' %}", { page: page }, function(data) {
+                    var url;
+                    var data = { page: page };
+
+                    url = "{% url 'load_more_items' %}";
+                    {% if category_id %}
+                        // 카테고리 페이지인 경우 category_id를 전달
+                        data.category_id = {{ category_id }};
+                    {% elif  query %}
+                        data.query = "{{query}}";
+                    {% endif %}
+                    $.get(url, data, function(data) {
                         isLoading = false;
                         // 로딩 이미지를 숨깁니다.
         

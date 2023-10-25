@@ -12,109 +12,8 @@
         <!-- Bootstrap icons-->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
         <!-- Core theme CSS (includes Bootstrap)-->
-        <link rel="stylesheet" type="text/css" href="{% static 'css/main_ex1.css' %}"/>
-        <link href="{% static "css/nav.css" %}" rel="stylesheet">
-
-        <style>
-            /* 공통 스타일 */
-            body {
-                background-color: #f5f5f5;
-                font-family: Arial, sans-serif;
-            }
-        
-            .container {
-                margin-top: 20px;
-            }
-        
-            h1 {
-                color: #333;
-            }
-        
-            /* 카테고리 목록 스타일 */
-            .category-list {
-                list-style-type: none;
-                padding: 0;
-                margin: 0;
-                text-align: center;
-            }
-        
-            .category-list li {
-                display: inline-block;
-                margin-right: 10px;
-                margin-bottom: 10px;
-                border-radius: 10px;
-                overflow: hidden;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            }
-        
-            .category-list a {
-                text-decoration: none;
-                color: #333;
-                display: block;
-                padding: 15px; /* 수정된 부분: 크기를 키우기 위해 padding을 조정 */
-                background-color: #f8f8f8;
-                transition: background-color 0.2s, color 0.2s;
-            }
-        
-            .category-list a:hover {
-                background-color: #333;
-                color: #fff;
-            }
-        
-            /* 테이블 스타일 */
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 20px;
-            }
-        
-            th, td {
-                border: 1px solid #ccc;
-                padding: 8px;
-            }
-        
-            .delete-button {
-                background-color: #ff0000;
-                color: #fff;
-                padding: 8px 12px; /* 버튼 크기 조정 */
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                transition: background-color 0.2s, color 0.2s;
-            }
-        
-            .delete-button:hover {
-                background-color: #ff3333;
-            }
-    
-            /* 검색창 스타일 */
-            .search-container {
-                margin-top: 20px;
-                text-align: center;
-            }
-    
-            .search-container input[type="text"] {
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 5px;
-            }
-    
-            .search-container button {
-                padding: 8px 12px;
-                background-color: #333;
-                color: #fff;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                transition: background-color 0.2s, color 0.2s;
-            }
-    
-            .search-container button:hover {
-                background-color: #555;
-            }
-    
-    
-        </style>
+        <link rel="stylesheet" type="text/css" href="{% static "css/nav.css" %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static "css/common.css" %}"/>
     </head>
     <body>
 
@@ -129,8 +28,10 @@
         </header> {% endcomment %}
         {% include "nav.html" %}
         
-        <h1>아이템 목록</h1>
-        <h2>카테고리 목록</h2>
+        {% comment %} <h1>아이템 목록</h1>
+        <h2>카테고리 목록</h2> {% endcomment %}
+        <br>
+        <br>
         <ul class="category-list">
             <li><a href="{% url 'main' %}">전체</a></li>
             {% for category in categories %}
@@ -154,13 +55,16 @@
                         <div class="col mb-5">
                             <div class="card h-100">
                                 <!-- Product image-->
-                                <img class="card-img-top" src="{{ item.image_url }}" alt="{{ item.item_name }}" />
+                                <div class="img-container">
+                                    <img class="card-img-top" src="{{ item.image_url }}" alt="{{ item.item_name }}" />
+                                </div>
                                 <!-- Product details-->
                                 <div class="card-body p-4">
                                     <div class="text-center">
                                         <!-- Product name-->
                                         <h5 class="fw-bolder">{{ item.item_name }}</h5>
                                         <!-- Product price-->
+                                        <h5 class="fw-bolder price">{{item.board_price}}</h5>
                                         <!-- Replace this comment with the price from your model -->
                                     </div>
                                 </div>
@@ -190,9 +94,9 @@
             var page = 2;  // 시작 페이지 번호
             var maxPages = {{ max_pages }};  // 전체 페이지 수, Django에서 전달받아야 함
             var loadingImage = "{% static 'images/loading.gif' %}";  // 로딩 이미지 경로를 수정하세요
-
             function loadMoreItems() {
                 if (page <= maxPages && !isLoading) {
+                    checkImageHeight();
                     isLoading = true;
                     // 로딩 이미지를 보여줄 수 있음
                     var url;
@@ -214,10 +118,13 @@
                                 var itemHtml = `
                                 <div class="col mb-5">
                                     <div class="card h-100">
-                                        <img class="card-img-top" src="${item.image_url}" alt="${item.item_name}" />
+                                        <div class="img-container">
+                                            <img class="card-img-top" src="${item.image_url}" alt="${item.item_name}" />
+                                        </div>
                                         <div class="card-body p-4">
                                             <div class="text-center">
                                                 <h5 class="fw-bolder">${item.item_name}</h5>
+                                                <h5 class="fw-bolder price">${item.board_price}</h5>
                                             </div>
                                         </div>
                                         <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
@@ -225,11 +132,13 @@
                                         </div>
                                     </div>
                                 </div>`;
-                            var itemElement = document.createElement("div");
-                            itemElement.innerHTML = itemHtml;
-                            document.querySelector(".row").appendChild(itemElement);
+                            const parentDiv = document.querySelector(".row");
+                            const lastChild = parentDiv.lastElementChild;
+                            lastChild.insertAdjacentHTML('afterend', itemHtml);
                             });
                             page += 1;
+                            checkImageHeight();
+
                         } else {
                             // 더 이상 로드할 항목이 없음을 처리
                         }
@@ -243,6 +152,20 @@
                 }
             });
         });
+
         
+        function checkImageHeight() {
+            const imgs = document.querySelectorAll('.img-container .card-img-top');
+            const containers = document.querySelectorAll('.img-container');
+            imgs.forEach((img, index) => {
+              const container = containers[index];
+              if (img.clientHeight < container.clientHeight-50) {
+                img.classList.add('larger-image');
+              } else {
+                img.classList.remove('larger-image');
+              }
+            });
+          }
+
     </script>
 </html>

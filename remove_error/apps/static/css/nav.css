@@ -641,6 +641,11 @@ progress {
   margin-left: auto;
 }
 
+.img-container{
+  height: 268px;
+  overflow: hidden;
+}
+
 @media (min-width: 480px) {
   .container-sm, .container {
     max-width: 480px;
@@ -4272,8 +4277,12 @@ textarea.form-control-lg {
 
 .card-img,
 .card-img-top,
-.card-img-bottom {
+.card-img-bottom {  
   width: 100%;
+}
+
+.larger-image{
+  width: 150%;
 }
 
 .card-img,

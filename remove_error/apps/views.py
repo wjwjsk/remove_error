@@ -290,11 +290,16 @@ def item_list_by_category(request, category_id):
     items = Items.objects.filter(category=category_id)
     categories = Category.objects.all()
 
+    for item in items:
+        board_description = item.board_description
+        image_urls = board_description.split("<br>")
+        item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
+
     context = {
         "items": items,
         "categories": categories,
     }
-    return render(request, "index.html", context)
+    return render(request, "main.html", context)
 
 
 def delete_item(request, item_id):
@@ -308,22 +313,27 @@ def delete_item(request, item_id):
 
 def search(request):
     query = request.GET.get("search")
+    categories = Category.objects.all()
     if query:
         results = Items.objects.filter(
             Q(item_name__icontains=query)
             | Q(board_description__icontains=query)
             | Q(category__name__icontains=query)
         )
-        categories_in_results = Category.objects.filter(items__in=results).distinct()
+
+        for item in results:
+            board_description = item.board_description
+            image_urls = board_description.split("<br>")
+            item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
 
         context = {
             "items": results,
-            "categories": categories_in_results,
+            "categories": categories,
         }
     else:
         context = {
             "items": Items.objects.all(),
-            "categories": Category.objects.all(),
+            "categories": categories,
         }
     return render(request, "main.html", context)
 
@@ -333,7 +343,11 @@ def detail(request):
 
 
 def main(request):
-    results = Items.objects.all()[:8]
+    all_items = Items.objects.all()
+    items_per_page = 8  # 페이지당 아이템 수
+    max_pages = (all_items.count() + items_per_page - 1) // items_per_page
+
+    results = all_items[:items_per_page]
     categories_in_results = Category.objects.all()
 
     for item in results:
@@ -344,26 +358,33 @@ def main(request):
     context = {
         "items": results,
         "categories": categories_in_results,
+        "max_pages": max_pages,  # max_pages를 context에 추가
     }
 
     return render(request, "main.html", context)
 
 
-def load_more_items(request, page=2):
-    items_per_page = 8  # 페이지당 표시할 아이템 수
+def load_more_items(request):
+    page = int(request.GET.get("page", 1))  # 페이지 번호를 가져옵니다.
 
+    items_per_page = 8  # 페이지당 아이템 수
     start = (page - 1) * items_per_page
-    end = page * items_per_page
+    end = start + items_per_page
 
     results = Items.objects.all()[start:end]
 
-    # results에 이미지 URL을 추가
+    item_data = []
     for item in results:
         board_description = item.board_description
         image_urls = board_description.split("<br>")
-        item.image_url = image_urls[0] if image_urls else ""
+        item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
 
-    # items를 JSON으로 반환
-    item_data = [{"image_url": item.image_url, "item_name": item.item_name} for item in results]
+        item_data.append(
+            {
+                "item_name": item.item_name,
+                "image_url": item.image_url,
+                # 필요한 다른 필드를 여기에 추가하세요.
+            }
+        )
 
     return JsonResponse({"items": item_data})

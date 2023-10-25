@@ -321,17 +321,21 @@ def ce_crawling_function():
                 category = link.select_one("#abcd").text
                 board_price = link.select_one("div:nth-child(3) font").text
                 in_soup = insert_soup(href)
-                bf_shop_url = re.findall(r'(https?://[^\s]+)', in_soup.select_one(
-                    ".d-flex.my-1 > .pl-3.flex-grow-1.text-break-all a").text)
+                bf_shop_url = re.findall(
+                    r"(https?://[^\s]+)",
+                    in_soup.select_one(".d-flex.my-1 > .pl-3.flex-grow-1.text-break-all a").text,
+                )
                 shop_url = bf_shop_url[0]
 
                 bf_title = in_soup.select_one("h1#bo_v_title").text.split()
-                title = ' '.join(bf_title[4:])
+                title = " ".join(bf_title[4:])
                 current_time = datetime.datetime.now()
                 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
                 # 게시글 이미지
                 image_src_str = ""
-                div_src_str = in_soup.select(".view-content.fr-view p img, .view-content.fr-view a img")
+                div_src_str = in_soup.select(
+                    ".view-content.fr-view p img, .view-content.fr-view a img"
+                )
                 for tag in div_src_str:
                     src = tag["src"]
                     image_src_str += src + "<br>"
@@ -344,7 +348,7 @@ def ce_crawling_function():
             else:
                 is_end_deal = True
                 href = link.select_one(".na-subject")["href"]
-                title = "블라인드 게시글"   
+                title = "블라인드 게시글"
                 shop_url = "블라인드 게시글"
                 formatted_time = "블라인드 게시글"
                 current_time = datetime.datetime.now()
@@ -368,7 +372,6 @@ def ce_crawling_function():
             )
 
             time.sleep(0.5)
-                
 
     return datas
 
@@ -391,7 +394,7 @@ def cl_crawling_function():
             if link.select_one(".icon_info"):
                 is_end_deal = True
             else:
-                is_end_deal = False            
+                is_end_deal = False
             in_soup = insert_soup(home + href)
             outlink = in_soup.select_one(".outlink .url")
             if outlink is not None and outlink.text:
@@ -403,28 +406,33 @@ def cl_crawling_function():
             img_tag = in_soup.select(".post_article p img")
             for tag in img_tag:
                 src = tag["src"]
-                image_src_str += src + "<br>"            
+                if src.split('?')[-1] == 'w=230&h=150':
+                    src = src.split('?')[0] + '?scale=width[740],options[limit]'
+                    image_src_str += src + "<br>"
+                else:
+                    image_src_str += src + "<br>"
             current_time = datetime.datetime.now()
-            formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")                
+            formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
-            datas[page].append({
-                'board_url': home + href,
-                'item_name': title,
-                "end_url": shop_url,
-                'clr_update_time': formatted_time,
-                "board_price": "본문참조",
-                "board_description": image_src_str,
-                "delivery_price": "본문참조",
-                "is_end_deal": is_end_deal,
-                "category": "기타",
-            })
+            datas[page].append(
+                {
+                    "board_url": home + href,
+                    "item_name": title,
+                    "end_url": shop_url,
+                    "clr_update_time": formatted_time,
+                    "board_price": "본문참조",
+                    "board_description": image_src_str,
+                    "delivery_price": "본문참조",
+                    "is_end_deal": is_end_deal,
+                    "category": "기타",
+                }
+            )
 
     return datas
 
 
-
 ## 해당url html 확인
-# url = "https://www.clien.net/service/board/jirum/18383201?od=T31&po=0&category=1000236&groupCd="
+# url = "https://www.clien.net/service/board/jirum/18377759?od=T31&po=0&category=1000236&groupCd="
 # txt_write(url)
 
 

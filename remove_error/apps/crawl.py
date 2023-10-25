@@ -373,10 +373,60 @@ def ce_crawling_function():
     return datas
 
 
+# clien
+# 해외 제외 2페이지만
+def cl_crawling_function():
+    home = "https://www.clien.net"
+    crl_page = 2
+    datas = [[] for _ in range(crl_page)]
+
+    for page in range(0, crl_page):
+        soup = insert_soup(f"{home}/service/board/jirum?&od=T31&category=1000236&po={page}")
+        list_tags = soup.select("div.contents_jirum .list_item.symph_row")
+
+        for link in list_tags:
+            subject_tag = link.select_one(".list_title span a")
+            href = subject_tag["href"]
+            title = subject_tag.text.strip()
+            if link.select_one(".icon_info"):
+                is_end_deal = True
+            else:
+                is_end_deal = False            
+            in_soup = insert_soup(home + href)
+            outlink = in_soup.select_one(".outlink .url")
+            if outlink is not None and outlink.text:
+                shop_url = in_soup.select_one(".outlink .url").text
+            else:
+                shop_url = ""
+                is_end_deal = True
+            image_src_str = ""
+            img_tag = in_soup.select(".post_article p img")
+            for tag in img_tag:
+                src = tag["src"]
+                image_src_str += src + "<br>"            
+            current_time = datetime.datetime.now()
+            formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")                
+
+            datas[page].append({
+                'board_url': home + href,
+                'item_name': title,
+                "end_url": shop_url,
+                'clr_update_time': formatted_time,
+                "board_price": "본문참조",
+                "board_description": image_src_str,
+                "delivery_price": "본문참조",
+                "is_end_deal": is_end_deal,
+                "category": "기타",
+            })
+
+    return datas
+
+
+
 ## 해당url html 확인
-# url = "https://coolenjoy.net/bbs/jirum/2471187"
+# url = "https://www.clien.net/service/board/jirum/18383201?od=T31&po=0&category=1000236&groupCd="
 # txt_write(url)
 
 
 ## 크롤링 데이터확인
-# json_write(ce_crawling_function())
+# json_write(cl_crawling_function())

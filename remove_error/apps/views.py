@@ -415,6 +415,7 @@ def load_more_items(request):
             {
                 "item_name": item.item_name,
                 "image_url": item.image_url,
+                "board_price": item.board_price,
                 # 필요한 다른 필드를 여기에 추가하세요.
             }
         )

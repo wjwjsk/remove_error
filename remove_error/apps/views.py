@@ -101,7 +101,17 @@ def categorize_deals(category):
     elif category in ["SW/게임", "등산/캠핑", "게임/SW", "게임"]:
         return Category.objects.get(name="스포츠 및 액티비티")
 
-    elif category in ["세일정보", "모바일/상품권", "기타", "해외핫딜", "상품권/쿠폰", "인터넷", "모바일", "이벤트", "쿠폰"]:
+    elif category in [
+        "세일정보",
+        "모바일/상품권",
+        "기타",
+        "해외핫딜",
+        "상품권/쿠폰",
+        "인터넷",
+        "모바일",
+        "이벤트",
+        "쿠폰",
+    ]:
         return Category.objects.get(name="기타")
 
     return Category.objects.get(name="기타")
@@ -374,7 +384,7 @@ def crawl_page(request):
 
 def item_list_by_category(request, category_id):
     # 선택한 카테고리에 해당하는 아이템들을 필터링합니다.
-    items = Items.objects.filter(category=category_id)
+    items = Items.objects.filter(category=category_id).order_by("-find_item_time")
     items_per_page = 8  # 페이지당 아이템 수
     max_pages = (items.count() + items_per_page - 1) // items_per_page
 
@@ -409,10 +419,8 @@ def search(request):
     categories = Category.objects.all()
     if query:
         results = Items.objects.filter(
-            Q(item_name__icontains=query)
-            | Q(board_description__icontains=query)
-            | Q(category__name__icontains=query)
-        )
+            Q(item_name__icontains=query) | Q(category__name__icontains=query)
+        ).order_by("-find_item_time")
 
         items_per_page = 8  # 페이지당 아이템 수
         max_pages = (results.count() + items_per_page - 1) // items_per_page
@@ -431,7 +439,7 @@ def search(request):
             "query": query,
         }
     else:
-        all_items = Items.objects.all()
+        all_items = Items.objects.all().order_by("-find_item_time")
         items_per_page = 8  # 페이지당 아이템 수
         max_pages = (all_items.count() + items_per_page - 1) // items_per_page
 
@@ -449,7 +457,7 @@ def detail(request):
 
 
 def main(request):
-    all_items = Items.objects.all()
+    all_items = Items.objects.all().order_by("-find_item_time")
     items_per_page = 8  # 페이지당 아이템 수
     max_pages = (all_items.count() + items_per_page - 1) // items_per_page
 
@@ -480,15 +488,13 @@ def load_more_items(request):
     end = start + items_per_page
 
     if category_id:
-        items = Items.objects.filter(category=category_id)
+        items = Items.objects.filter(category=category_id).order_by("-find_item_time")
     elif query:
         items = results = Items.objects.filter(
-            Q(item_name__icontains=query)
-            | Q(board_description__icontains=query)
-            | Q(category__name__icontains=query)
-        )
+            Q(item_name__icontains=query) | Q(category__name__icontains=query)
+        ).order_by("-find_item_time")
     else:
-        items = Items.objects.all()
+        items = Items.objects.all().order_by("-find_item_time")
 
     results = items[start:end]
 

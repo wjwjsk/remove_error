@@ -384,7 +384,7 @@ def crawl_page(request):
 
 def item_list_by_category(request, category_id):
     # 선택한 카테고리에 해당하는 아이템들을 필터링합니다.
-    items = Items.objects.filter(category=category_id).order_by("-find_item_time")
+    items = Items.objects.filter(category=category_id).order_by("-id")
     items_per_page = 8  # 페이지당 아이템 수
     max_pages = (items.count() + items_per_page - 1) // items_per_page
 
@@ -420,7 +420,7 @@ def search(request):
     if query:
         results = Items.objects.filter(
             Q(item_name__icontains=query) | Q(category__name__icontains=query)
-        ).order_by("-find_item_time")
+        ).order_by("-id")
 
         items_per_page = 8  # 페이지당 아이템 수
         max_pages = (results.count() + items_per_page - 1) // items_per_page
@@ -439,7 +439,7 @@ def search(request):
             "query": query,
         }
     else:
-        all_items = Items.objects.all().order_by("-find_item_time")
+        all_items = Items.objects.all().order_by("-id")
         items_per_page = 8  # 페이지당 아이템 수
         max_pages = (all_items.count() + items_per_page - 1) // items_per_page
 
@@ -461,7 +461,7 @@ def detail(request, item_id):
 
 
 def main(request):
-    all_items = Items.objects.all().order_by("-find_item_time")
+    all_items = Items.objects.all().order_by("-id")
     items_per_page = 8  # 페이지당 아이템 수
     max_pages = (all_items.count() + items_per_page - 1) // items_per_page
 
@@ -492,13 +492,13 @@ def load_more_items(request):
     end = start + items_per_page
 
     if category_id:
-        items = Items.objects.filter(category=category_id).order_by("-find_item_time")
+        items = Items.objects.filter(category=category_id).order_by("-id")
     elif query:
         items = results = Items.objects.filter(
             Q(item_name__icontains=query) | Q(category__name__icontains=query)
-        ).order_by("-find_item_time")
+        ).order_by("-id")
     else:
-        items = Items.objects.all().order_by("-find_item_time")
+        items = Items.objects.all().order_by("-id")
 
     results = items[start:end]
 
@@ -513,6 +513,7 @@ def load_more_items(request):
                 "item_name": item.item_name,
                 "image_url": item.image_url,
                 "board_price": item.board_price,
+                "id": item.id,
                 # 필요한 다른 필드를 여기에 추가하세요.
             }
         )

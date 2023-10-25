@@ -9,6 +9,8 @@ from .crawl import (
     pp_crawling_function,
     qz_crawling_function,
     al_crawling_function,
+    ce_crawling_function,
+    cl_crawling_function,
 )
 import openai
 from django.core.exceptions import ImproperlyConfigured
@@ -67,10 +69,21 @@ from django.core.paginator import Paginator, EmptyPage
 # 11. 기타
 # 12. 해외핫딜
 def categorize_deals(category):
-    if category in ["PC제품", "가전제품", "컴퓨터", "디지털", "PC/하드웨어", "노트북/모바일", "가전/TV", "전자제품"]:
+    if category in [
+        "PC제품",
+        "가전제품",
+        "컴퓨터",
+        "디지털",
+        "PC/하드웨어",
+        "노트북/모바일",
+        "가전/TV",
+        "전자제품",
+        "PC관련",
+        "가전",
+    ]:
         return Category.objects.get(name="전자제품 및 가전제품")
 
-    elif category in ["의류", "의류/잡화", "패션/의류"]:
+    elif category in ["의류", "의류/잡화", "패션/의류", "의류잡화"]:
         return Category.objects.get(name="의류 및 패션")
 
     elif category in ["먹거리", "식품/건강", "생활/식품", "식품"]:
@@ -85,10 +98,10 @@ def categorize_deals(category):
     elif category in ["화장품"]:
         return Category.objects.get(name="뷰티 및 화장품")
 
-    elif category in ["SW/게임", "등산/캠핑", "게임/SW"]:
+    elif category in ["SW/게임", "등산/캠핑", "게임/SW", "게임"]:
         return Category.objects.get(name="스포츠 및 액티비티")
 
-    elif category in ["세일정보", "모바일/상품권", "기타", "해외핫딜", "상품권/쿠폰"]:
+    elif category in ["세일정보", "모바일/상품권", "기타", "해외핫딜", "상품권/쿠폰", "인터넷", "모바일", "이벤트", "쿠폰"]:
         return Category.objects.get(name="기타")
 
     return Category.objects.get(name="기타")
@@ -149,41 +162,41 @@ def crawl_page(request):
                     result_model.save()
 
     # qz_crawling_function
-    # result = qz_crawling_function()
-    # transposed_result = list(zip(*result))
+    result = qz_crawling_function()
+    transposed_result = list(zip(*result))
     qz_count = 0
-    # for column in transposed_result:
-    #     for data in column:
-    #         if not Items.objects.filter(
-    #             Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
-    #         ).exists():
-    #             if data["is_end_deal"] == False:
-    #                 result_model = Items(
-    #                     item_name=data["item_name"],
-    #                     end_url=data["end_url"],
-    #                     board_url=data["board_url"],
-    #                     clr_update_time=current_time,
-    #                     board_price=data["board_price"][:30],
-    #                     board_description=data["board_description"],
-    #                     delivery_price=data["delivery_price"][:30],
-    #                     is_end_deal=data["is_end_deal"],
-    #                     category=categorize_deals(data["category"]),
-    #                     find_item_time=current_time,
-    #                 )
-    #                 result_model.save()
-    #                 qz_count += 1
-    #         else:
-    #             result_model = Items.objects.filter(
-    #                 Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
-    #             ).first()
-    #             if data["board_url"] == result_model.board_url:
-    #                 result_model.board_url = data["board_url"]
-    #                 result_model.clr_update_time = current_time
-    #                 result_model.board_price = data["board_price"][:30]
-    #                 result_model.board_description = data["board_description"]
-    #                 result_model.delivery_price = data["delivery_price"][:30]
-    #                 result_model.is_end_deal = data["is_end_deal"]
-    #                 result_model.save()
+    for column in transposed_result:
+        for data in column:
+            if not Items.objects.filter(
+                Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+            ).exists():
+                if data["is_end_deal"] == False:
+                    result_model = Items(
+                        item_name=data["item_name"],
+                        end_url=data["end_url"],
+                        board_url=data["board_url"],
+                        clr_update_time=current_time,
+                        board_price=data["board_price"][:30],
+                        board_description=data["board_description"],
+                        delivery_price=data["delivery_price"][:30],
+                        is_end_deal=data["is_end_deal"],
+                        category=categorize_deals(data["category"]),
+                        find_item_time=current_time,
+                    )
+                    result_model.save()
+                    qz_count += 1
+            else:
+                result_model = Items.objects.filter(
+                    Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+                ).first()
+                if data["board_url"] == result_model.board_url:
+                    result_model.board_url = data["board_url"]
+                    result_model.clr_update_time = current_time
+                    result_model.board_price = data["board_price"][:30]
+                    result_model.board_description = data["board_description"]
+                    result_model.delivery_price = data["delivery_price"][:30]
+                    result_model.is_end_deal = data["is_end_deal"]
+                    result_model.save()
 
     # al_crawling_function
     result = al_crawling_function()
@@ -221,7 +234,79 @@ def crawl_page(request):
                     result_model.delivery_price = data["delivery_price"][:30]
                     result_model.is_end_deal = data["is_end_deal"]
                     result_model.save()
+    # ce_crawling_function
+    result = ce_crawling_function()
+    transposed_result = list(zip(*result))
+    ce_count = 0
+    for column in transposed_result:
+        for data in column:
+            if not Items.objects.filter(
+                Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+            ).exists():
+                if data["is_end_deal"] == False:
+                    result_model = Items(
+                        item_name=data["item_name"],
+                        end_url=data["end_url"],
+                        board_url=data["board_url"],
+                        clr_update_time=current_time,
+                        board_price=data["board_price"][:30],
+                        board_description=data["board_description"],
+                        delivery_price=data["delivery_price"][:30],
+                        is_end_deal=data["is_end_deal"],
+                        category=categorize_deals(data["category"]),
+                        find_item_time=current_time,
+                    )
+                    result_model.save()
+                    ce_count += 1
+            else:
+                result_model = Items.objects.filter(
+                    Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+                ).first()
+                if data["board_url"] == result_model.board_url:
+                    result_model.board_url = data["board_url"]
+                    result_model.clr_update_time = current_time
+                    result_model.board_price = data["board_price"][:30]
+                    result_model.board_description = data["board_description"]
+                    result_model.delivery_price = data["delivery_price"][:30]
+                    result_model.is_end_deal = data["is_end_deal"]
+                    result_model.save()
 
+    # cl_crawling_function
+    result = cl_crawling_function()
+    transposed_result = list(zip(*result))
+    cl_count = 0
+    for column in transposed_result:
+        for data in column:
+            if not Items.objects.filter(
+                Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+            ).exists():
+                if data["is_end_deal"] == False:
+                    result_model = Items(
+                        item_name=data["item_name"],
+                        end_url=data["end_url"],
+                        board_url=data["board_url"],
+                        clr_update_time=current_time,
+                        board_price=data["board_price"][:30],
+                        board_description=data["board_description"],
+                        delivery_price=data["delivery_price"][:30],
+                        is_end_deal=data["is_end_deal"],
+                        category=categorize_deals(data["category"]),
+                        find_item_time=current_time,
+                    )
+                    result_model.save()
+                    cl_count += 1
+            else:
+                result_model = Items.objects.filter(
+                    Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+                ).first()
+                if data["board_url"] == result_model.board_url:
+                    result_model.board_url = data["board_url"]
+                    result_model.clr_update_time = current_time
+                    result_model.board_price = data["board_price"][:30]
+                    result_model.board_description = data["board_description"]
+                    result_model.delivery_price = data["delivery_price"][:30]
+                    result_model.is_end_deal = data["is_end_deal"]
+                    result_model.save()
     # pp_crawling_function
     pp_count = 0
     # result = pp_crawling_function()
@@ -268,6 +353,8 @@ def crawl_page(request):
         "pp_count": pp_count,
         "qz_count": qz_count,
         "al_count": al_count,
+        "ce_count": ce_count,
+        "cl_count": cl_count,
         "deleted_count": deleted_count,
     }
 

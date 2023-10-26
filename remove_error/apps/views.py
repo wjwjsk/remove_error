@@ -91,8 +91,8 @@ def categorize_deals(category):
     elif category in ["생활용품", "가전/가구"]:
         return Category.objects.get(name="홈 및 가든")
 
-    elif category in ["패키지/이용권", "상품권"]:
-        return Category.objects.get(name="여행 및 숙박")
+    elif category in ["패키지/이용권", "상품권", "세일정보", "모바일/상품권", "상품권/쿠폰", "이벤트", "쿠폰"]:
+        return Category.objects.get(name="할인 및 상품권")
 
     elif category in ["화장품"]:
         return Category.objects.get(name="뷰티 및 화장품")
@@ -100,17 +100,7 @@ def categorize_deals(category):
     elif category in ["SW/게임", "등산/캠핑", "게임/SW", "게임"]:
         return Category.objects.get(name="스포츠 및 액티비티")
 
-    elif category in [
-        "세일정보",
-        "모바일/상품권",
-        "기타",
-        "해외핫딜",
-        "상품권/쿠폰",
-        "인터넷",
-        "모바일",
-        "이벤트",
-        "쿠폰",
-    ]:
+    elif category in ["기타", "해외핫딜", "인터넷", "모바일"]:
         return Category.objects.get(name="기타")
 
     return Category.objects.get(name="기타")
@@ -551,7 +541,7 @@ def item_list_by_category(request, category_id):
     max_pages = (items.count() + items_per_page - 1) // items_per_page
 
     results = items[:items_per_page]
-    categories_in_results = Category.objects.all()
+    categories_in_results = Category.objects.all().order_by("id")
 
     for item in results:
         board_description = item.board_description
@@ -578,7 +568,7 @@ def delete_item(request, item_id):
 
 def search(request):
     query = request.GET.get("search")
-    categories = Category.objects.all()
+    categories = Category.objects.all().order_by("id")
     if query:
         results = Items.objects.filter(
             Q(item_name__icontains=query) | Q(category__name__icontains=query)
@@ -628,7 +618,7 @@ def main(request):
     max_pages = (all_items.count() + items_per_page - 1) // items_per_page
 
     results = all_items[:items_per_page]
-    categories_in_results = Category.objects.all()
+    categories_in_results = Category.objects.all().order_by("id")
 
     for item in results:
         board_description = item.board_description

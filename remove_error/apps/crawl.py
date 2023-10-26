@@ -316,7 +316,9 @@ def ce_crawling_function():
         # 게시판 링크+제목+금액+배송비+시간
         for link in list_tags:
             blind = link.select_one(".na-item a")
-            if (blind is None or not any(filter(lambda word: word == "블라인드", blind.text.split()))) and link.select_one(".fa-lock") is None:
+            if (
+                blind is None or not any(filter(lambda word: word == "블라인드", blind.text.split()))
+            ) and link.select_one(".fa-lock") is None:
                 href = link.select_one(".na-subject")["href"]
                 category = link.select_one("#abcd").text
                 board_price = link.select_one("div:nth-child(3) font").text
@@ -406,8 +408,8 @@ def cl_crawling_function():
             img_tag = in_soup.select(".post_article p img")
             for tag in img_tag:
                 src = tag["src"]
-                if src.split('?')[-1] == 'w=230&h=150':
-                    src = src.split('?')[0] + '?scale=width[740],options[limit]'
+                if src.split("?")[-1] == "w=230&h=150":
+                    src = src.split("?")[0] + "?scale=width[740],options[limit]"
                     image_src_str += src + "<br>"
                 else:
                     image_src_str += src + "<br>"
@@ -431,13 +433,10 @@ def cl_crawling_function():
     return datas
 
 
-
-
-
 ## 해당url html 확인
 # url = "https://www.clien.net/service/board/jirum/18377759?od=T31&po=0&category=1000236&groupCd="
 # txt_write(url)
 
 
 ## 크롤링 데이터확인
-json_write(ce_crawling_function())
+# json_write(ce_crawling_function())

@@ -40,34 +40,37 @@ def fm_crawling_function():
     home = "https://www.fmkorea.com"
     datas = [[] for _ in range(crl_page)]
     for page in range(0, crl_page):
-        soup = insert_soup(home + "/index?mid=hotdeal&page=" + str(page + 1))
-        list_tags = soup.select("div.fm_best_widget > ul > li")
-        # 게시판 링크+제목+금액+배송비+시간
-        for link in list_tags:
-            href = link.select_one(".li h3 a")["href"]
-            bf_title = "".join(
-                link.select_one(".li h3 a").find_all(string=True, recursive=False)
-            ).strip()
-            title = re.sub(r"[\xa0\t]", "", bf_title)
-            info_texts = [a.text for a in link.select(".hotdeal_info span a")[1:3]]
-            category = link.select_one("div .category a").text
-            current_time = datetime.datetime.now()
-            formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-            # 게시글 내부 이미지
-            in_soup = insert_soup("https://www.fmkorea.com" + href)
-            shop_url = in_soup.select_one("tr td .xe_content a").text
+        try:
+            soup = insert_soup(home + "/index?mid=hotdeal&page=" + str(page + 1))
+            list_tags = soup.select("div.fm_best_widget > ul > li")
+            # 게시판 링크+제목+금액+배송비+시간
+            for link in list_tags:
+                href = link.select_one(".li h3 a")["href"]
+                bf_title = "".join(
+                    link.select_one(".li h3 a").find_all(string=True, recursive=False)
+                ).strip()
+                title = re.sub(r"[\xa0\t]", "", bf_title)
+                info_texts = [a.text for a in link.select(".hotdeal_info span a")[1:3]]
+                category = link.select_one("div .category a").text
+                current_time = datetime.datetime.now()
+                formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                # 게시글 내부 이미지
+                in_soup = insert_soup("https://www.fmkorea.com" + href)
+                shop_url = in_soup.select_one("tr td .xe_content a").text
 
-            desc_div = in_soup.select_one("div article div")
-            image_src_str = ""
-            div_a_tags = desc_div.select("div > img, p > img")
-            for tag in div_a_tags:
-                src = tag["src"]
-                image_src_str += src + "<br>"
+                desc_div = in_soup.select_one("div article div")
+                image_src_str = ""
+                div_a_tags = desc_div.select("div > img, p > img")
+                for tag in div_a_tags:
+                    src = tag["src"]
+                    image_src_str += src + "<br>"
 
-            if "hotdeal_var8Y" in link.select_one(".li h3 a")["class"]:
-                is_end_deal = True
-            else:
-                is_end_deal = False
+                if "hotdeal_var8Y" in link.select_one(".li h3 a")["class"]:
+                    is_end_deal = True
+                else:
+                    is_end_deal = False
+        except AttributeError:
+            print(href)
 
             datas[page].append(
                 {
@@ -191,21 +194,24 @@ def qz_crawling_function():
         list_tags = soup.select("table tbody tr")
         # 게시판 링크+제목+금액+배송비+시간
         for link in list_tags:
-            fa_lock = link.select_one(".fa-lock")
-            if fa_lock is None or fa_lock.text not in "블라인드":
-                href = link.select_one(".market-info-list p a")["href"]
-                in_soup = insert_soup(home + href)
-                bf_title = "".join(
-                    in_soup.select_one("dl dt .title").find_all(string=True, recursive=False)
-                ).strip()
-                title = re.sub(r"\[[^\]]+\]\s*", "", bf_title, count=1)
-                shop_url = in_soup.select_one(".market-info-view-table tr td a").text
-                board_price = in_soup.select_one(".market-info-view-table tr td span").text
-                tr = in_soup.find("th", string=re.compile("배송비"))
-                delivery_price = tr.find_next_sibling("td").get_text()
-                category = "".join(
-                    in_soup.select_one(".left .ca_name").find_all(string=True, recursive=False)
-                ).strip()
+            try:
+                fa_lock = link.select_one(".fa-lock")
+                if fa_lock is None or fa_lock.text not in "블라인드":
+                    href = link.select_one(".market-info-list p a")["href"]
+                    in_soup = insert_soup(home + href)
+                    bf_title = "".join(
+                        in_soup.select_one("dl dt .title").find_all(string=True, recursive=False)
+                    ).strip()
+                    title = re.sub(r"\[[^\]]+\]\s*", "", bf_title, count=1)
+                    shop_url = in_soup.select_one(".market-info-view-table tr td a").text
+                    board_price = in_soup.select_one(".market-info-view-table tr td span").text
+                    tr = in_soup.find("th", string=re.compile("배송비"))
+                    delivery_price = tr.find_next_sibling("td").get_text()
+                    category = "".join(
+                        in_soup.select_one(".left .ca_name").find_all(string=True, recursive=False)
+                    ).strip()
+            except AttributeError:
+                print(href)
                 current_time = datetime.datetime.now()
                 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
                 # 게시글 이미지
@@ -258,33 +264,38 @@ def al_crawling_function():
         list_tags = soup.select(".article-list .list-table.hybrid .vrow.hybrid")
         # 게시판 링크+제목+금액+배송비+시간
         for link in list_tags:
-            href = link.select_one(".title.hybrid-title")["href"]
-            in_soup = insert_soup(home + href)
-            category = in_soup.select_one(".badge.badge-success.category-badge").text
-            shop_url = in_soup.select_one("table tbody > tr:nth-child(1) > td:nth-child(2) a").text
-            bf_title = in_soup.select_one(
-                "table tbody > tr:nth-child(3) > td:nth-child(2) span"
-            ).text
-            title = re.sub(r"\[[^\]]+\]\s*", "", bf_title.strip(), count=1)
-            board_price = in_soup.select_one(
-                "table tbody > tr:nth-child(4) > td:nth-child(2) span"
-            ).text.strip()
-            delivery_price = in_soup.select_one(
-                "table tbody > tr:nth-child(5) > td:nth-child(2) span"
-            ).text.strip()
-            current_time = datetime.datetime.now()
-            formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-            # 게시글 이미지
-            image_src_str = ""
-            div_src_str = in_soup.select(".fr-view.article-content p img")
-            for tag in div_src_str:
-                src = tag["src"]
-                image_src_str += src + "<br>"
+            try:
+                href = link.select_one(".title.hybrid-title")["href"]
+                in_soup = insert_soup(home + href)
+                category = in_soup.select_one(".badge.badge-success.category-badge").text
+                shop_url = in_soup.select_one(
+                    "table tbody > tr:nth-child(1) > td:nth-child(2) a"
+                ).text
+                bf_title = in_soup.select_one(
+                    "table tbody > tr:nth-child(3) > td:nth-child(2) span"
+                ).text
+                title = re.sub(r"\[[^\]]+\]\s*", "", bf_title.strip(), count=1)
+                board_price = in_soup.select_one(
+                    "table tbody > tr:nth-child(4) > td:nth-child(2) span"
+                ).text.strip()
+                delivery_price = in_soup.select_one(
+                    "table tbody > tr:nth-child(5) > td:nth-child(2) span"
+                ).text.strip()
+                current_time = datetime.datetime.now()
+                formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                # 게시글 이미지
+                image_src_str = ""
+                div_src_str = in_soup.select(".fr-view.article-content p img")
+                for tag in div_src_str:
+                    src = tag["src"]
+                    image_src_str += src + "<br>"
 
-            if "close-deal" in in_soup.select_one(".title-row .title")["class"]:
-                is_end_deal = True
-            else:
-                is_end_deal = False
+                if "close-deal" in in_soup.select_one(".title-row .title")["class"]:
+                    is_end_deal = True
+                else:
+                    is_end_deal = False
+            except AttributeError:
+                print(href)
 
             datas[page].append(
                 {
@@ -315,35 +326,43 @@ def ce_crawling_function():
         list_tags = soup.select(".na-table.d-md-table.w-100 li")
         # 게시판 링크+제목+금액+배송비+시간
         for link in list_tags:
-            blind = link.select_one(".na-item a")
-            if (blind is None or not any(filter(lambda word: word == "블라인드", blind.text.split()))) and link.select_one(".fa-lock") is None:
-                href = link.select_one(".na-subject")["href"]
-                category = link.select_one("#abcd").text
-                board_price = link.select_one("div:nth-child(3) font").text
-                in_soup = insert_soup(href)
-                bf_shop_url = re.findall(
-                    r"(https?://[^\s]+)",
-                    in_soup.select_one(".d-flex.my-1 > .pl-3.flex-grow-1.text-break-all a").text,
-                )
-                shop_url = bf_shop_url[0]
+            try:
+                blind = link.select_one(".na-item a")
+                if (
+                    blind is None
+                    or not any(filter(lambda word: word == "블라인드", blind.text.split()))
+                ) and link.select_one(".fa-lock") is None:
+                    href = link.select_one(".na-subject")["href"]
+                    category = link.select_one("#abcd").text
+                    board_price = link.select_one("div:nth-child(3) font").text
+                    in_soup = insert_soup(href)
+                    bf_shop_url = re.findall(
+                        r"(https?://[^\s]+)",
+                        in_soup.select_one(
+                            ".d-flex.my-1 > .pl-3.flex-grow-1.text-break-all a"
+                        ).text,
+                    )
+                    shop_url = bf_shop_url[0]
 
-                bf_title = in_soup.select_one("h1#bo_v_title").text.split()
-                title = " ".join(bf_title[4:])
-                current_time = datetime.datetime.now()
-                formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-                # 게시글 이미지
-                image_src_str = ""
-                div_src_str = in_soup.select(
-                    ".view-content.fr-view p img, .view-content.fr-view a img"
-                )
-                for tag in div_src_str:
-                    src = tag["src"]
-                    image_src_str += src + "<br>"
+                    bf_title = in_soup.select_one("h1#bo_v_title").text.split()
+                    title = " ".join(bf_title[4:])
+                    current_time = datetime.datetime.now()
+                    formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                    # 게시글 이미지
+                    image_src_str = ""
+                    div_src_str = in_soup.select(
+                        ".view-content.fr-view p img, .view-content.fr-view a img"
+                    )
+                    for tag in div_src_str:
+                        src = tag["src"]
+                        image_src_str += src + "<br>"
 
-                if "종료된" in in_soup.select_one("#bo_v_atc b").text.split():
-                    is_end_deal = True
-                else:
-                    is_end_deal = False
+                    if "종료된" in in_soup.select_one("#bo_v_atc b").text.split():
+                        is_end_deal = True
+                    else:
+                        is_end_deal = False
+            except AttributeError:
+                print(href)
 
             else:
                 is_end_deal = True
@@ -386,33 +405,35 @@ def cl_crawling_function():
     for page in range(0, crl_page):
         soup = insert_soup(f"{home}/service/board/jirum?&od=T31&category=1000236&po={page}")
         list_tags = soup.select("div.contents_jirum .list_item.symph_row")
-
-        for link in list_tags:
-            subject_tag = link.select_one(".list_title span a")
-            href = subject_tag["href"]
-            title = subject_tag.text.strip()
-            if link.select_one(".icon_info"):
-                is_end_deal = True
-            else:
-                is_end_deal = False
-            in_soup = insert_soup(home + href)
-            outlink = in_soup.select_one(".outlink .url")
-            if outlink is not None and outlink.text:
-                shop_url = in_soup.select_one(".outlink .url").text
-            else:
-                shop_url = ""
-                is_end_deal = True
-            image_src_str = ""
-            img_tag = in_soup.select(".post_article p img")
-            for tag in img_tag:
-                src = tag["src"]
-                if src.split('?')[-1] == 'w=230&h=150':
-                    src = src.split('?')[0] + '?scale=width[740],options[limit]'
-                    image_src_str += src + "<br>"
+        try:
+            for link in list_tags:
+                subject_tag = link.select_one(".list_title span a")
+                href = subject_tag["href"]
+                title = subject_tag.text.strip()
+                if link.select_one(".icon_info"):
+                    is_end_deal = True
                 else:
-                    image_src_str += src + "<br>"
-            current_time = datetime.datetime.now()
-            formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                    is_end_deal = False
+                in_soup = insert_soup(home + href)
+                outlink = in_soup.select_one(".outlink .url")
+                if outlink is not None and outlink.text:
+                    shop_url = in_soup.select_one(".outlink .url").text
+                else:
+                    shop_url = ""
+                    is_end_deal = True
+                image_src_str = ""
+                img_tag = in_soup.select(".post_article p img")
+                for tag in img_tag:
+                    src = tag["src"]
+                    if src.split("?")[-1] == "w=230&h=150":
+                        src = src.split("?")[0] + "?scale=width[740],options[limit]"
+                        image_src_str += src + "<br>"
+                    else:
+                        image_src_str += src + "<br>"
+                current_time = datetime.datetime.now()
+                formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        except AttributeError:
+            print(href)
 
             datas[page].append(
                 {
@@ -431,13 +452,10 @@ def cl_crawling_function():
     return datas
 
 
-
-
-
 ## 해당url html 확인
 # url = "https://www.clien.net/service/board/jirum/18377759?od=T31&po=0&category=1000236&groupCd="
 # txt_write(url)
 
 
 ## 크롤링 데이터확인
-json_write(ce_crawling_function())
+# json_write(qz_crawling_function())

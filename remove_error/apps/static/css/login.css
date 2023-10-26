@@ -60,3 +60,31 @@ button:hover{
     color: #6c757d;
     cursor: pointer;
 }
+
+  img{
+    height: 30px;
+    width: auto;
+  }
+  
+  .social_login-button {
+    cursor: pointer;
+    display: flex;
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #222;
+    background-color: #fff;
+    border: 1px solid #bdbdbd;
+    border-radius: 25px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 700;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+.login-button:hover{
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.3s ease;
+}

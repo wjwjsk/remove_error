@@ -1,5 +1,6 @@
 from django.urls import include, path
 from . import views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path("", views.main, name="main"),
@@ -12,4 +13,9 @@ urlpatterns = [
     path("main_ex1/", views.main_ex1, name="main_ex1"),
     path("main_ex2/", views.main_ex2, name="main_ex2"),
     path("load-more-items/", views.load_more_items, name="load_more_items"),
+    
+        # 로그인 관련 url
+    path('login', views.login, name='login'),
+    path('login_success/', views.login_success, name='login_success'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='main'), name='logout'),
 ]

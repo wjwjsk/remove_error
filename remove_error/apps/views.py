@@ -404,3 +404,13 @@ def main_ex2(request):
         "end_page": end_page,
     }
     return render(request, "main_ex2.html", context)
+
+# 로그인 관련
+from django.shortcuts import render
+
+def login(request):
+    return render(request, "login.html")
+
+def login_success(request):
+    username = request.user  # 현재 로그인된 사용자의 이름 가져오기
+    return render(request, 'main.html', {'username': username})

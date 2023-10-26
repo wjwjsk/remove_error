@@ -13,6 +13,7 @@ urlpatterns = [
     path("", views.main, name="main"),
     path("load-more-items", views.load_more_items, name="load_more_items"),
     path('login/', views.login, name='login'),
-    path('accounts/signup/', signup, name='signup'),
-    path('logout/', logout, name='logout'),
+    path('login_form/', views.login_form, name='login_form'),
+    path('signup/', views.signup, name='signup'),
+    path('logout/', views.logout, name='logout'),
 ]

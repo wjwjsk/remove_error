@@ -2,15 +2,30 @@
 
 <!DOCTYPE html>
 <html lang="en">
-
   <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/reset.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/global.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/footer.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/login.css' %}"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/reset.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/global.css' %}"
+    />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/footer.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/login.css' %}"
+    />
     <title>Document</title>
   </head>
 
@@ -18,19 +33,17 @@
     {% include "nav.html" %}
     <div class="container">
       {% block content %}
-        <div class="login-container">
-          <form method="post" class="login-form">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="login-button">로그인</button>
-          </form>
-          <p class="register-reco">
-            회원이 아니신가요?
-            <a href="" class="bold">회원가입</a>
-          </p>
-        </div>
+      <div class="login-container">
+        <form method="post" class="login-form" action="{% url 'login_form' %}">
+          {% csrf_token %} {{ form.as_p }}
+          <button type="submit" class="login-button">로그인</button>
+        </form>
+        <p class="register-reco">
+          회원이 아니신가요?
+          <a href="{% url 'signup' %}" class="bold">회원가입</a>
+        </p>
+      </div>
       {% endblock %}
     </div>
   </body>
-
 </html>

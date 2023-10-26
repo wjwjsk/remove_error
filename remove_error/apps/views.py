@@ -522,16 +522,13 @@ def load_more_items(request):
 
     return JsonResponse({"items": item_data})
 
-
-
-
 def signup(request):
     if request.method == 'POST':
         if request.POST['password1'] == request.POST['password2']:
             user = User.objects.create_user(
-                                            username=request.POST['username'],
-                                            password=request.POST['password1'],
-                                            email=request.POST['email'],)
+                username=request.POST['username'],
+                password=request.POST['password1'],
+                email=request.POST['email'],)
             auth.login(request, user)
             return redirect('/')
         return render(request, 'signup.html')
@@ -550,9 +547,13 @@ def login(request):
     else:
         return render(request, 'login.html')
 
+
 def logout(request):
     auth.logout(request)
-    return redirect('home')
+    return redirect('main')
 
 def home(request):
     return render(request, 'home.html')
+
+def login_form(request):
+    return render(request, 'login_form.html')

@@ -1,4 +1,5 @@
 import json, re, os, time
+from pathlib import Path
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Items, Category
 from django.http import JsonResponse
@@ -17,42 +18,15 @@ from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage
 
 
-# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = Path(__file__).resolve().parent.parent
+with open("remove_error/config.json") as f:
+    json_object = json.load(f)
 
-# # secrets.json 파일의 경로를 계산합니다.
-# secret_file = os.path.join(BASE_DIR, "config.json")
-
-# with open(secret_file) as f:
-#     secrets = json.loads(f.read())
-
-
-# def get_secret(setting, secrets=secrets):
-#     try:
-#         return secrets[setting]
-#     except KeyError:
-#         error_msg = "Set the {} environment variable".format(setting)
-#         raise ImproperlyConfigured(error_msg)
 
 #     # OpenAI API 키 설정
 
 
-# openai.api_key = get_secret("openai_api_key")
-# for i in range(3):
-#     product_title = items[i].item_name
-
-#     response = openai.ChatCompletion.create(
-#         model="gpt-3.5-turbo",
-#         messages=[
-#             {"role": "system", "content": "You are a helpful assistant."},
-#             {
-#                 "role": "user",
-#                 "content": f"이 상품의 주요 카테고리는 무엇인가요? 최대한 짧게 카테고리만 대답하세요. {product_title}은(는) ",
-#             },
-#         ],
-#     )
-
-#     category = response["choices"][0]["message"]["content"].strip()
-#     print(f"{product_title} 카테고리: {category}")
+openai.api_key = json_object["OPENAI_API_KEY"]
 
 
 #  1. 먹거리
@@ -67,7 +41,7 @@ from django.core.paginator import Paginator, EmptyPage
 # 10. 패키지/이용권
 # 11. 기타
 # 12. 해외핫딜
-def categorize_deals(category):
+def categorize_deals(category, item_name):
     if category in [
         "PC제품",
         "가전제품",
@@ -91,7 +65,15 @@ def categorize_deals(category):
     elif category in ["생활용품", "가전/가구"]:
         return Category.objects.get(name="홈 및 가든")
 
-    elif category in ["패키지/이용권", "상품권", "세일정보", "모바일/상품권", "상품권/쿠폰", "이벤트", "쿠폰"]:
+    elif category in [
+        "패키지/이용권",
+        "상품권",
+        "세일정보",
+        "모바일/상품권",
+        "상품권/쿠폰",
+        "이벤트",
+        "쿠폰",
+    ]:
         return Category.objects.get(name="할인 및 상품권")
 
     elif category in ["화장품"]:
@@ -101,6 +83,38 @@ def categorize_deals(category):
         return Category.objects.get(name="스포츠 및 액티비티")
 
     elif category in ["기타", "해외핫딜", "인터넷", "모바일"]:
+        product_title = item_name
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {
+                    "role": "user",
+                    "content": f"이 상품의 주요 카테고리는 무엇인가요? 전자제품 및 가전제품, 의류 및 패션 ,식품 및 식료품,홈 및 가든,할인 및 상품권,뷰티 및 화장품,스포츠 및 액티비티,기타 중 하나를 정확하고 최대한 짧게 카테고리 자체만 대답하세요. {product_title}은(는) ",
+                },
+            ],
+        )
+
+        category_ai = response["choices"][0]["message"]["content"].strip()
+        print(f"{product_title} 기존 카테고리: {category} = > 예측 카테고리 :{category_ai}")
+        # 사전에 정의된 카테고리 목록
+        predefined_categories = [
+            "전자제품 및 가전제품",
+            "의류 및 패션",
+            "식품 및 식료품",
+            "홈 및 가든",
+            "할인 및 상품권",
+            "뷰티 및 화장품",
+            "스포츠 및 액티비티",
+        ]
+
+        for cate in predefined_categories:
+            if cate.strip() in category_ai.strip() or category_ai.strip() in cate.strip():
+                print(f"{product_title} : 결과 기존 카테고리: {category} -> {cate}")
+                return Category.objects.get(name=cate)
+
+        # 미리 정의된 카테고리 목록 또는 category_ai에 없는 경우 "기타" 카테고리 반환
         return Category.objects.get(name="기타")
 
     return Category.objects.get(name="기타")
@@ -166,7 +180,7 @@ def crawl_page(request):
                             board_description=data["board_description"],
                             delivery_price=data["delivery_price"][:30],
                             is_end_deal=data["is_end_deal"],
-                            category=categorize_deals(data["category"]),
+                            category=categorize_deals(data["category"], data["item_name"]),
                             find_item_time=current_time,
                         )
                         result_model.save()
@@ -231,7 +245,7 @@ def crawl_page(request):
                             board_description=data["board_description"],
                             delivery_price=data["delivery_price"][:30],
                             is_end_deal=data["is_end_deal"],
-                            category=categorize_deals(data["category"]),
+                            category=categorize_deals(data["category"], data["item_name"]),
                             find_item_time=current_time,
                         )
                         result_model.save()
@@ -296,7 +310,7 @@ def crawl_page(request):
                             board_description=data["board_description"],
                             delivery_price=data["delivery_price"][:30],
                             is_end_deal=data["is_end_deal"],
-                            category=categorize_deals(data["category"]),
+                            category=categorize_deals(data["category"], data["item_name"]),
                             find_item_time=current_time,
                         )
                         result_model.save()
@@ -361,7 +375,7 @@ def crawl_page(request):
                             board_description=data["board_description"],
                             delivery_price=data["delivery_price"][:30],
                             is_end_deal=data["is_end_deal"],
-                            category=categorize_deals(data["category"]),
+                            category=categorize_deals(data["category"], data["item_name"]),
                             find_item_time=current_time,
                         )
                         result_model.save()
@@ -425,7 +439,7 @@ def crawl_page(request):
                             board_description=data["board_description"],
                             delivery_price=data["delivery_price"][:30],
                             is_end_deal=data["is_end_deal"],
-                            category=categorize_deals(data["category"]),
+                            category=categorize_deals(data["category"], data["item_name"]),
                             find_item_time=current_time,
                         )
                         result_model.save()
@@ -489,7 +503,7 @@ def crawl_page(request):
     #                         board_description=data["board_description"],
     #                         delivery_price="제목 참조",
     #                         is_end_deal=data["is_end_deal"],
-    #                         category=categorize_deals(data["category"]),
+    #                         category=categorize_deals(data["category"],data["item_name"]),
     #                         find_item_time=current_time,
     #                     )
     #                     result_model.save()

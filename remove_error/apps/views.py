@@ -9,6 +9,8 @@ from .crawl import (
     pp_crawling_function,
     qz_crawling_function,
     al_crawling_function,
+    ce_crawling_function,
+    cl_crawling_function,
 )
 import openai
 from django.core.exceptions import ImproperlyConfigured
@@ -67,10 +69,21 @@ from django.core.paginator import Paginator, EmptyPage
 # 11. 기타
 # 12. 해외핫딜
 def categorize_deals(category):
-    if category in ["PC제품", "가전제품", "컴퓨터", "디지털", "PC/하드웨어", "노트북/모바일", "가전/TV", "전자제품"]:
+    if category in [
+        "PC제품",
+        "가전제품",
+        "컴퓨터",
+        "디지털",
+        "PC/하드웨어",
+        "노트북/모바일",
+        "가전/TV",
+        "전자제품",
+        "PC관련",
+        "가전",
+    ]:
         return Category.objects.get(name="전자제품 및 가전제품")
 
-    elif category in ["의류", "의류/잡화", "패션/의류"]:
+    elif category in ["의류", "의류/잡화", "패션/의류", "의류잡화"]:
         return Category.objects.get(name="의류 및 패션")
 
     elif category in ["먹거리", "식품/건강", "생활/식품", "식품"]:
@@ -85,16 +98,26 @@ def categorize_deals(category):
     elif category in ["화장품"]:
         return Category.objects.get(name="뷰티 및 화장품")
 
-    elif category in ["SW/게임", "등산/캠핑", "게임/SW"]:
+    elif category in ["SW/게임", "등산/캠핑", "게임/SW", "게임"]:
         return Category.objects.get(name="스포츠 및 액티비티")
 
-    elif category in ["세일정보", "모바일/상품권", "기타", "해외핫딜", "상품권/쿠폰"]:
+    elif category in [
+        "세일정보",
+        "모바일/상품권",
+        "기타",
+        "해외핫딜",
+        "상품권/쿠폰",
+        "인터넷",
+        "모바일",
+        "이벤트",
+        "쿠폰",
+    ]:
         return Category.objects.get(name="기타")
 
     return Category.objects.get(name="기타")
 
 
-def main(request):
+def test(request):
     items = Items.objects.all()
 
     categories = Category.objects.all()
@@ -149,41 +172,41 @@ def crawl_page(request):
                     result_model.save()
 
     # qz_crawling_function
-    # result = qz_crawling_function()
-    # transposed_result = list(zip(*result))
+    result = qz_crawling_function()
+    transposed_result = list(zip(*result))
     qz_count = 0
-    # for column in transposed_result:
-    #     for data in column:
-    #         if not Items.objects.filter(
-    #             Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
-    #         ).exists():
-    #             if data["is_end_deal"] == False:
-    #                 result_model = Items(
-    #                     item_name=data["item_name"],
-    #                     end_url=data["end_url"],
-    #                     board_url=data["board_url"],
-    #                     clr_update_time=current_time,
-    #                     board_price=data["board_price"][:30],
-    #                     board_description=data["board_description"],
-    #                     delivery_price=data["delivery_price"][:30],
-    #                     is_end_deal=data["is_end_deal"],
-    #                     category=categorize_deals(data["category"]),
-    #                     find_item_time=current_time,
-    #                 )
-    #                 result_model.save()
-    #                 qz_count += 1
-    #         else:
-    #             result_model = Items.objects.filter(
-    #                 Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
-    #             ).first()
-    #             if data["board_url"] == result_model.board_url:
-    #                 result_model.board_url = data["board_url"]
-    #                 result_model.clr_update_time = current_time
-    #                 result_model.board_price = data["board_price"][:30]
-    #                 result_model.board_description = data["board_description"]
-    #                 result_model.delivery_price = data["delivery_price"][:30]
-    #                 result_model.is_end_deal = data["is_end_deal"]
-    #                 result_model.save()
+    for column in transposed_result:
+        for data in column:
+            if not Items.objects.filter(
+                Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+            ).exists():
+                if data["is_end_deal"] == False:
+                    result_model = Items(
+                        item_name=data["item_name"],
+                        end_url=data["end_url"],
+                        board_url=data["board_url"],
+                        clr_update_time=current_time,
+                        board_price=data["board_price"][:30],
+                        board_description=data["board_description"],
+                        delivery_price=data["delivery_price"][:30],
+                        is_end_deal=data["is_end_deal"],
+                        category=categorize_deals(data["category"]),
+                        find_item_time=current_time,
+                    )
+                    result_model.save()
+                    qz_count += 1
+            else:
+                result_model = Items.objects.filter(
+                    Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+                ).first()
+                if data["board_url"] == result_model.board_url:
+                    result_model.board_url = data["board_url"]
+                    result_model.clr_update_time = current_time
+                    result_model.board_price = data["board_price"][:30]
+                    result_model.board_description = data["board_description"]
+                    result_model.delivery_price = data["delivery_price"][:30]
+                    result_model.is_end_deal = data["is_end_deal"]
+                    result_model.save()
 
     # al_crawling_function
     result = al_crawling_function()
@@ -221,7 +244,79 @@ def crawl_page(request):
                     result_model.delivery_price = data["delivery_price"][:30]
                     result_model.is_end_deal = data["is_end_deal"]
                     result_model.save()
+    # ce_crawling_function
+    result = ce_crawling_function()
+    transposed_result = list(zip(*result))
+    ce_count = 0
+    for column in transposed_result:
+        for data in column:
+            if not Items.objects.filter(
+                Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+            ).exists():
+                if data["is_end_deal"] == False:
+                    result_model = Items(
+                        item_name=data["item_name"],
+                        end_url=data["end_url"],
+                        board_url=data["board_url"],
+                        clr_update_time=current_time,
+                        board_price=data["board_price"][:30],
+                        board_description=data["board_description"],
+                        delivery_price=data["delivery_price"][:30],
+                        is_end_deal=data["is_end_deal"],
+                        category=categorize_deals(data["category"]),
+                        find_item_time=current_time,
+                    )
+                    result_model.save()
+                    ce_count += 1
+            else:
+                result_model = Items.objects.filter(
+                    Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+                ).first()
+                if data["board_url"] == result_model.board_url:
+                    result_model.board_url = data["board_url"]
+                    result_model.clr_update_time = current_time
+                    result_model.board_price = data["board_price"][:30]
+                    result_model.board_description = data["board_description"]
+                    result_model.delivery_price = data["delivery_price"][:30]
+                    result_model.is_end_deal = data["is_end_deal"]
+                    result_model.save()
 
+    # cl_crawling_function
+    result = cl_crawling_function()
+    transposed_result = list(zip(*result))
+    cl_count = 0
+    for column in transposed_result:
+        for data in column:
+            if not Items.objects.filter(
+                Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+            ).exists():
+                if data["is_end_deal"] == False:
+                    result_model = Items(
+                        item_name=data["item_name"],
+                        end_url=data["end_url"],
+                        board_url=data["board_url"],
+                        clr_update_time=current_time,
+                        board_price=data["board_price"][:30],
+                        board_description=data["board_description"],
+                        delivery_price=data["delivery_price"][:30],
+                        is_end_deal=data["is_end_deal"],
+                        category=categorize_deals(data["category"]),
+                        find_item_time=current_time,
+                    )
+                    result_model.save()
+                    cl_count += 1
+            else:
+                result_model = Items.objects.filter(
+                    Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+                ).first()
+                if data["board_url"] == result_model.board_url:
+                    result_model.board_url = data["board_url"]
+                    result_model.clr_update_time = current_time
+                    result_model.board_price = data["board_price"][:30]
+                    result_model.board_description = data["board_description"]
+                    result_model.delivery_price = data["delivery_price"][:30]
+                    result_model.is_end_deal = data["is_end_deal"]
+                    result_model.save()
     # pp_crawling_function
     pp_count = 0
     # result = pp_crawling_function()
@@ -268,6 +363,8 @@ def crawl_page(request):
         "pp_count": pp_count,
         "qz_count": qz_count,
         "al_count": al_count,
+        "ce_count": ce_count,
+        "cl_count": cl_count,
         "deleted_count": deleted_count,
     }
 
@@ -287,14 +384,25 @@ def crawl_page(request):
 
 def item_list_by_category(request, category_id):
     # 선택한 카테고리에 해당하는 아이템들을 필터링합니다.
-    items = Items.objects.filter(category=category_id)
-    categories = Category.objects.all()
+    items = Items.objects.filter(category=category_id).order_by("-find_item_time")
+    items_per_page = 8  # 페이지당 아이템 수
+    max_pages = (items.count() + items_per_page - 1) // items_per_page
+
+    results = items[:items_per_page]
+    categories_in_results = Category.objects.all()
+
+    for item in results:
+        board_description = item.board_description
+        image_urls = board_description.split("<br>")
+        item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
 
     context = {
-        "items": items,
-        "categories": categories,
+        "items": results,
+        "categories": categories_in_results,
+        "max_pages": max_pages,  # max_pages를 context에 추가
+        "category_id": category_id,
     }
-    return render(request, "index.html", context)
+    return render(request, "main.html", context)
 
 
 def delete_item(request, item_id):
@@ -308,33 +416,57 @@ def delete_item(request, item_id):
 
 def search(request):
     query = request.GET.get("search")
+    categories = Category.objects.all()
     if query:
         results = Items.objects.filter(
-            Q(item_name__icontains=query)
-            | Q(board_description__icontains=query)
-            | Q(category__name__icontains=query)
-        )
-        categories_in_results = Category.objects.filter(items__in=results).distinct()
+            Q(item_name__icontains=query) | Q(category__name__icontains=query)
+        ).order_by("-find_item_time")
+
+        items_per_page = 8  # 페이지당 아이템 수
+        max_pages = (results.count() + items_per_page - 1) // items_per_page
+
+        results = results[:items_per_page]
+
+        for item in results:
+            board_description = item.board_description
+            image_urls = board_description.split("<br>")
+            item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
 
         context = {
             "items": results,
-            "categories": categories_in_results,
+            "categories": categories,
+            "max_pages": max_pages,  # max_pages를 context에 추가
+            "query": query,
         }
     else:
+        all_items = Items.objects.all().order_by("-find_item_time")
+        items_per_page = 8  # 페이지당 아이템 수
+        max_pages = (all_items.count() + items_per_page - 1) // items_per_page
+
+        results = all_items[:items_per_page]
         context = {
-            "items": Items.objects.all(),
-            "categories": Category.objects.all(),
+            "items": results,
+            "categories": categories,
+            "max_pages": max_pages,  # max_pages를 context에 추가
         }
-    return render(request, "index.html", context)
+    return render(request, "main.html", context)
 
 
-def detail(request):
-    return render(request, "detail.html")
+def detail(request, item_id):
+    item = Items.objects.get(id=item_id)
+    board_description = item.board_description
+    image_urls = board_description.split("<br>")
+    item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
+    return render(request, "detail_ex1.html", {"item": item})
 
 
-def main_ex1(request):
-    results = Items.objects.all()[:8]
-    categories_in_results = Category.objects.filter(items__in=results).distinct()
+def main(request):
+    all_items = Items.objects.all().order_by("-find_item_time")
+    items_per_page = 8  # 페이지당 아이템 수
+    max_pages = (all_items.count() + items_per_page - 1) // items_per_page
+
+    results = all_items[:items_per_page]
+    categories_in_results = Category.objects.all()
 
     for item in results:
         board_description = item.board_description
@@ -344,63 +476,45 @@ def main_ex1(request):
     context = {
         "items": results,
         "categories": categories_in_results,
+        "max_pages": max_pages,  # max_pages를 context에 추가
     }
 
-    return render(request, "main_ex1.html", context)
+    return render(request, "main.html", context)
 
 
 def load_more_items(request):
-    page = int(request.GET.get("page", 2))  # 기본 페이지 번호는 2로 설정
-    items_per_page = 8  # 페이지당 표시할 아이템 수
+    category_id = request.GET.get("category_id")
+    page = int(request.GET.get("page", 1))  # 페이지 번호를 가져옵니다
+    query = request.GET.get("query")
 
+    items_per_page = 8  # 페이지당 아이템 수
     start = (page - 1) * items_per_page
-    end = page * items_per_page
+    end = start + items_per_page
 
-    results = Items.objects.all()[start:end]
+    if category_id:
+        items = Items.objects.filter(category=category_id).order_by("-find_item_time")
+    elif query:
+        items = results = Items.objects.filter(
+            Q(item_name__icontains=query) | Q(category__name__icontains=query)
+        ).order_by("-find_item_time")
+    else:
+        items = Items.objects.all().order_by("-find_item_time")
 
-    # results에 이미지 URL을 추가
-    for item in results:
-        board_description = item.board_description
-        image_urls = board_description.split("<br>")
-        item.image_url = image_urls[0] if image_urls else ""
+    results = items[start:end]
 
-    # items를 JSON으로 반환
-    item_data = [{"image_url": item.image_url, "item_name": item.item_name} for item in results]
-
-    return JsonResponse({"items": item_data})
-
-
-def main_ex2(request):
-    results = Items.objects.all()
-    categories_in_results = Category.objects.filter(items__in=results).distinct()
-
+    item_data = []
     for item in results:
         board_description = item.board_description
         image_urls = board_description.split("<br>")
         item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
 
-    paginator = Paginator(results, 8)  # 페이지당 10개 아이템 표시, 이 숫자를 원하는대로 수정 가능
+        item_data.append(
+            {
+                "item_name": item.item_name,
+                "image_url": item.image_url,
+                "board_price": item.board_price,
+                # 필요한 다른 필드를 여기에 추가하세요.
+            }
+        )
 
-    page = request.GET.get("page")
-
-    try:
-        items = paginator.get_page(page)
-    except EmptyPage:
-        items = paginator.get_page(1)  # 페이지가 없을 경우 첫 번째 페이지로 돌아감
-
-    # 페이지 번호를 한 번에 5개만 보이도록 설정
-    displayed_page_range = 5
-    current_page = items.number
-    total_pages = paginator.num_pages
-
-    # 페이지 범위 계산
-    start_page = max(1, current_page - displayed_page_range // 2)
-    end_page = min(total_pages, start_page + displayed_page_range - 1)
-
-    context = {
-        "items": items,
-        "categories": categories_in_results,
-        "start_page": start_page,
-        "end_page": end_page,
-    }
-    return render(request, "main_ex2.html", context)
+    return JsonResponse({"items": item_data})

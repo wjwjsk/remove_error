@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "phonenumber_field",
     "apps",
-    'accounts',
     'bootstrap4'
 ]
 

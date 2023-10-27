@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "phonenumber_field",
     "apps",
-    'bootstrap4',
+    
     'social_django',
     'django.contrib.sites',
     'allauth',
@@ -56,6 +56,7 @@ INSTALLED_APPS = [
 ]
 
 # 로그인 관련
+################################################################################
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = json_object["OAUTH2"]["GOOGLE"]["KEY"]
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = json_object["OAUTH2"]["GOOGLE"]["SECRET"]
 SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = 'http://127.0.0.1:8000/complete/google-oauth2/'
@@ -84,6 +85,7 @@ SITE_ID = 1
 SOCIALACCOUNT_LOGIN_ON_GET = True
 ACCOUNT_LOGOUT_REDIRECT_URL = 'main'
 ACCOUNT_LOGOUT_ON_GET = True 
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -94,6 +96,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware"
 ]
+################################################################################
+
 
 ROOT_URLCONF = "remove_error.urls"
 
@@ -168,8 +172,6 @@ LOGOUT_REDIRECT_URL = "/"
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-# STATICFILES_DIRS = [ BASE_DIR, "Static", ]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 

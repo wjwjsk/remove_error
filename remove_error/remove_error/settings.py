@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "phonenumber_field",
     "apps",
-    'bootstrap4'
+    'bootstrap4',
     'social_django',
     'django.contrib.sites',
     'allauth',
@@ -56,8 +56,8 @@ INSTALLED_APPS = [
 ]
 
 # 로그인 관련
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = json_object["OAUTH2"]["GOOGLE"]["KEY"]
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = json_object["OAUTH2"]["GOOGLE"]["SECRET"]
 SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = 'http://127.0.0.1:8000/complete/google-oauth2/'
 
 AUTHENTICATION_BACKENDS = (
@@ -72,8 +72,8 @@ SOCIAL_AUTH_AUTHENTICATION_BACKENDS = [
     'social_core.backends.google.GoogleOAuth2',
 ]
 
-SOCIAL_AUTH_NAVER_KEY= ''
-SOCIAL_AUTH_NAVER_SECRET  = ''
+SOCIAL_AUTH_NAVER_KEY= json_object["OAUTH2"]["NAVER"]["KEY"]
+SOCIAL_AUTH_NAVER_SECRET  = json_object["OAUTH2"]["NAVER"]["SECRET"]
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'login_success'
 ACCOUNT_LOGOUT_REDIRECT_URL = 'login_success'
@@ -93,6 +93,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware"
 ]
 
 ROOT_URLCONF = "remove_error.urls"
@@ -169,7 +170,7 @@ LOGOUT_REDIRECT_URL = "/"
 
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [ BASE_DIR, "Static", ]
+# STATICFILES_DIRS = [ BASE_DIR, "Static", ]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 

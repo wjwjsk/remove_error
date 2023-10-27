@@ -1,5 +1,5 @@
-import json
-import os
+import json, re, os, time
+from pathlib import Path
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Items, Category
 from django.http import JsonResponse
@@ -21,42 +21,15 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
 
-# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = Path(__file__).resolve().parent.parent
+with open("remove_error/config.json") as f:
+    json_object = json.load(f)
 
-# # secrets.json 파일의 경로를 계산합니다.
-# secret_file = os.path.join(BASE_DIR, "config.json")
-
-# with open(secret_file) as f:
-#     secrets = json.loads(f.read())
-
-
-# def get_secret(setting, secrets=secrets):
-#     try:
-#         return secrets[setting]
-#     except KeyError:
-#         error_msg = "Set the {} environment variable".format(setting)
-#         raise ImproperlyConfigured(error_msg)
 
 #     # OpenAI API 키 설정
 
 
-# openai.api_key = get_secret("openai_api_key")
-# for i in range(3):
-#     product_title = items[i].item_name
-
-#     response = openai.ChatCompletion.create(
-#         model="gpt-3.5-turbo",
-#         messages=[
-#             {"role": "system", "content": "You are a helpful assistant."},
-#             {
-#                 "role": "user",
-#                 "content": f"이 상품의 주요 카테고리는 무엇인가요? 최대한 짧게 카테고리만 대답하세요. {product_title}은(는) ",
-#             },
-#         ],
-#     )
-
-#     category = response["choices"][0]["message"]["content"].strip()
-#     print(f"{product_title} 카테고리: {category}")
+openai.api_key = json_object["OPENAI_API_KEY"]
 
 
 #  1. 먹거리
@@ -71,7 +44,7 @@ from django.contrib.auth.models import User
 # 10. 패키지/이용권
 # 11. 기타
 # 12. 해외핫딜
-def categorize_deals(category):
+def categorize_deals(category, item_name):
     if category in [
         "PC제품",
         "가전제품",
@@ -95,8 +68,16 @@ def categorize_deals(category):
     elif category in ["생활용품", "가전/가구"]:
         return Category.objects.get(name="홈 및 가든")
 
-    elif category in ["패키지/이용권", "상품권"]:
-        return Category.objects.get(name="여행 및 숙박")
+    elif category in [
+        "패키지/이용권",
+        "상품권",
+        "세일정보",
+        "모바일/상품권",
+        "상품권/쿠폰",
+        "이벤트",
+        "쿠폰",
+    ]:
+        return Category.objects.get(name="할인 및 상품권")
 
     elif category in ["화장품"]:
         return Category.objects.get(name="뷰티 및 화장품")
@@ -104,17 +85,39 @@ def categorize_deals(category):
     elif category in ["SW/게임", "등산/캠핑", "게임/SW", "게임"]:
         return Category.objects.get(name="스포츠 및 액티비티")
 
-    elif category in [
-        "세일정보",
-        "모바일/상품권",
-        "기타",
-        "해외핫딜",
-        "상품권/쿠폰",
-        "인터넷",
-        "모바일",
-        "이벤트",
-        "쿠폰",
-    ]:
+    elif category in ["기타", "해외핫딜", "인터넷", "모바일"]:
+        product_title = item_name
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {
+                    "role": "user",
+                    "content": f"이 상품의 주요 카테고리는 무엇인가요? 전자제품 및 가전제품, 의류 및 패션 ,식품 및 식료품,홈 및 가든,할인 및 상품권,뷰티 및 화장품,스포츠 및 액티비티,기타 중 하나를 정확하고 최대한 짧게 카테고리 자체만 대답하세요. {product_title}은(는) ",
+                },
+            ],
+        )
+
+        category_ai = response["choices"][0]["message"]["content"].strip()
+        print(f"{product_title} 기존 카테고리: {category} = > 예측 카테고리 :{category_ai}")
+        # 사전에 정의된 카테고리 목록
+        predefined_categories = [
+            "전자제품 및 가전제품",
+            "의류 및 패션",
+            "식품 및 식료품",
+            "홈 및 가든",
+            "할인 및 상품권",
+            "뷰티 및 화장품",
+            "스포츠 및 액티비티",
+        ]
+
+        for cate in predefined_categories:
+            if cate.strip() in category_ai.strip() or category_ai.strip() in cate.strip():
+                print(f"{product_title} : 결과 기존 카테고리: {category} -> {cate}")
+                return Category.objects.get(name=cate)
+
+        # 미리 정의된 카테고리 목록 또는 category_ai에 없는 경우 "기타" 카테고리 반환
         return Category.objects.get(name="기타")
 
     return Category.objects.get(name="기타")
@@ -138,29 +141,54 @@ def crawl_page(request):
     # 크롤링 수행 및 추가된 레코드 수 카운트
     current_time = timezone.now()
     # fm_crawling_function
+    start_time = time.time()  # 작업 시작 시간 기록
+
     result = fm_crawling_function()
     transposed_result = list(zip(*result))
     fm_count = 0
     for column in transposed_result:
         for data in column:
+            board_url = data.get("board_url", "")
+            end_url = data.get("end_url", "")
+
+            # 추가된 부분: 길이 검사
+            if len(board_url) > 500 or len(end_url) > 500:
+                continue  # 500자가 넘으면 저장하지 않음
+
             if not Items.objects.filter(
                 Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
             ).exists():
                 if data["is_end_deal"] == False:
-                    result_model = Items(
-                        item_name=data["item_name"],
-                        end_url=data["end_url"],
-                        board_url=data["board_url"],
-                        clr_update_time=current_time,
-                        board_price=data["board_price"][:30],
-                        board_description=data["board_description"],
-                        delivery_price=data["delivery_price"][:30],
-                        is_end_deal=data["is_end_deal"],
-                        category=categorize_deals(data["category"]),
-                        find_item_time=current_time,
-                    )
-                    result_model.save()
-                    fm_count += 1
+                    # 첫 번째 단어 추출
+                    first_word = data["item_name"].split()[0]
+
+                    # 링크에서 "//"와 "/" 사이 부분 추출
+                    link_part = re.search(r"\/\/(.*?)\/", data["end_url"])
+                    if link_part:
+                        extracted_url = link_part.group(1)
+                    else:
+                        extracted_url = data["end_url"]
+
+                    if not Items.objects.filter(
+                        Q(item_name__icontains=first_word)
+                        & Q(end_url__icontains=extracted_url)
+                        & Q(board_price=data["board_price"])
+                    ).exists():
+                        result_model = Items(
+                            item_name=data["item_name"],
+                            end_url=data["end_url"],
+                            board_url=data["board_url"],
+                            clr_update_time=current_time,
+                            board_price=data["board_price"][:30],
+                            board_description=data["board_description"],
+                            delivery_price=data["delivery_price"][:30],
+                            is_end_deal=data["is_end_deal"],
+                            category=categorize_deals(data["category"], data["item_name"]),
+                            find_item_time=current_time,
+                        )
+                        result_model.save()
+                        fm_count += 1
+
             else:
                 result_model = Items.objects.filter(
                     Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
@@ -173,31 +201,58 @@ def crawl_page(request):
                     result_model.delivery_price = data["delivery_price"][:30]
                     result_model.is_end_deal = data["is_end_deal"]
                     result_model.save()
+    end_time = time.time()  # 작업 종료 시간 기록
+    elapsed_time = end_time - start_time  # 작업 소요 시간 계산
 
+    print(f"에펨코리아 작업 완료. 소요 시간: {elapsed_time:.2f} 초")
+
+    start_time = time.time()
     # qz_crawling_function
     result = qz_crawling_function()
     transposed_result = list(zip(*result))
     qz_count = 0
     for column in transposed_result:
         for data in column:
+            board_url = data.get("board_url", "")
+            end_url = data.get("end_url", "")
+
+            # 추가된 부분: 길이 검사
+            if len(board_url) > 500 or len(end_url) > 500:
+                continue  # 500자가 넘으면 저장하지 않음
+
             if not Items.objects.filter(
                 Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
             ).exists():
                 if data["is_end_deal"] == False:
-                    result_model = Items(
-                        item_name=data["item_name"],
-                        end_url=data["end_url"],
-                        board_url=data["board_url"],
-                        clr_update_time=current_time,
-                        board_price=data["board_price"][:30],
-                        board_description=data["board_description"],
-                        delivery_price=data["delivery_price"][:30],
-                        is_end_deal=data["is_end_deal"],
-                        category=categorize_deals(data["category"]),
-                        find_item_time=current_time,
-                    )
-                    result_model.save()
-                    qz_count += 1
+                    # 첫 번째 단어 추출
+                    first_word = data["item_name"].split()[0]
+
+                    # 링크에서 "//"와 "/" 사이 부분 추출
+                    link_part = re.search(r"\/\/(.*?)\/", data["end_url"])
+                    if link_part:
+                        extracted_url = link_part.group(1)
+                    else:
+                        extracted_url = data["end_url"]
+
+                    if not Items.objects.filter(
+                        Q(item_name__icontains=first_word)
+                        & Q(end_url__icontains=extracted_url)
+                        & Q(board_price=data["board_price"])
+                    ).exists():
+                        result_model = Items(
+                            item_name=data["item_name"],
+                            end_url=data["end_url"],
+                            board_url=data["board_url"],
+                            clr_update_time=current_time,
+                            board_price=data["board_price"][:30],
+                            board_description=data["board_description"],
+                            delivery_price=data["delivery_price"][:30],
+                            is_end_deal=data["is_end_deal"],
+                            category=categorize_deals(data["category"], data["item_name"]),
+                            find_item_time=current_time,
+                        )
+                        result_model.save()
+                        qz_count += 1
             else:
                 result_model = Items.objects.filter(
                     Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
@@ -210,6 +265,12 @@ def crawl_page(request):
                     result_model.delivery_price = data["delivery_price"][:30]
                     result_model.is_end_deal = data["is_end_deal"]
                     result_model.save()
+    end_time = time.time()  # 작업 종료 시간 기록
+    elapsed_time = end_time - start_time  # 작업 소요 시간 계산
+
+    print(f"퀘이사존 작업 완료. 소요 시간: {elapsed_time:.2f} 초")
+
+    start_time = time.time()
 
     # al_crawling_function
     result = al_crawling_function()
@@ -217,60 +278,46 @@ def crawl_page(request):
     al_count = 0
     for column in transposed_result:
         for data in column:
+            board_url = data.get("board_url", "")
+            end_url = data.get("end_url", "")
+
+            # 추가된 부분: 길이 검사
+            if len(board_url) > 500 or len(end_url) > 500:
+                continue  # 500자가 넘으면 저장하지 않음
+
             if not Items.objects.filter(
                 Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
             ).exists():
                 if data["is_end_deal"] == False:
-                    result_model = Items(
-                        item_name=data["item_name"],
-                        end_url=data["end_url"],
-                        board_url=data["board_url"],
-                        clr_update_time=current_time,
-                        board_price=data["board_price"][:30],
-                        board_description=data["board_description"],
-                        delivery_price=data["delivery_price"][:30],
-                        is_end_deal=data["is_end_deal"],
-                        category=categorize_deals(data["category"]),
-                        find_item_time=current_time,
-                    )
-                    result_model.save()
-                    al_count += 1
-            else:
-                result_model = Items.objects.filter(
-                    Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
-                ).first()
-                if data["board_url"] == result_model.board_url:
-                    result_model.board_url = data["board_url"]
-                    result_model.clr_update_time = current_time
-                    result_model.board_price = data["board_price"][:30]
-                    result_model.board_description = data["board_description"]
-                    result_model.delivery_price = data["delivery_price"][:30]
-                    result_model.is_end_deal = data["is_end_deal"]
-                    result_model.save()
-    # ce_crawling_function
-    result = ce_crawling_function()
-    transposed_result = list(zip(*result))
-    ce_count = 0
-    for column in transposed_result:
-        for data in column:
-            if not Items.objects.filter(
-                Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
-            ).exists():
-                if data["is_end_deal"] == False:
-                    result_model = Items(
-                        item_name=data["item_name"],
-                        end_url=data["end_url"],
-                        board_url=data["board_url"],
-                        clr_update_time=current_time,
-                        board_price=data["board_price"][:30],
-                        board_description=data["board_description"],
-                        delivery_price=data["delivery_price"][:30],
-                        is_end_deal=data["is_end_deal"],
-                        category=categorize_deals(data["category"]),
-                        find_item_time=current_time,
-                    )
-                    result_model.save()
-                    ce_count += 1
+                    # 첫 번째 단어 추출
+                    first_word = data["item_name"].split()[0]
+
+                    # 링크에서 "//"와 "/" 사이 부분 추출
+                    link_part = re.search(r"\/\/(.*?)\/", data["end_url"])
+                    if link_part:
+                        extracted_url = link_part.group(1)
+                    else:
+                        extracted_url = data["end_url"]
+
+                    if not Items.objects.filter(
+                        Q(item_name__icontains=first_word)
+                        & Q(end_url__icontains=extracted_url)
+                        & Q(board_price=data["board_price"])
+                    ).exists():
+                        result_model = Items(
+                            item_name=data["item_name"],
+                            end_url=data["end_url"],
+                            board_url=data["board_url"],
+                            clr_update_time=current_time,
+                            board_price=data["board_price"][:30],
+                            board_description=data["board_description"],
+                            delivery_price=data["delivery_price"][:30],
+                            is_end_deal=data["is_end_deal"],
+                            category=categorize_deals(data["category"], data["item_name"]),
+                            find_item_time=current_time,
+                        )
+                        result_model.save()
+                        al_count += 1
             else:
                 result_model = Items.objects.filter(
                     Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
@@ -284,30 +331,58 @@ def crawl_page(request):
                     result_model.is_end_deal = data["is_end_deal"]
                     result_model.save()
 
-    # cl_crawling_function
-    result = cl_crawling_function()
+    end_time = time.time()  # 작업 종료 시간 기록
+    elapsed_time = end_time - start_time  # 작업 소요 시간 계산
+
+    print(f"아카라이브 작업 완료. 소요 시간: {elapsed_time:.2f} 초")
+
+    start_time = time.time()
+    # # ce_crawling_function
+    result = ce_crawling_function()
     transposed_result = list(zip(*result))
-    cl_count = 0
+    ce_count = 0
     for column in transposed_result:
         for data in column:
+            board_url = data.get("board_url", "")
+            end_url = data.get("end_url", "")
+
+            # 추가된 부분: 길이 검사
+            if len(board_url) > 500 or len(end_url) > 500:
+                continue  # 500자가 넘으면 저장하지 않음
+
             if not Items.objects.filter(
                 Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
             ).exists():
                 if data["is_end_deal"] == False:
-                    result_model = Items(
-                        item_name=data["item_name"],
-                        end_url=data["end_url"],
-                        board_url=data["board_url"],
-                        clr_update_time=current_time,
-                        board_price=data["board_price"][:30],
-                        board_description=data["board_description"],
-                        delivery_price=data["delivery_price"][:30],
-                        is_end_deal=data["is_end_deal"],
-                        category=categorize_deals(data["category"]),
-                        find_item_time=current_time,
-                    )
-                    result_model.save()
-                    cl_count += 1
+                    # 첫 번째 단어 추출
+                    first_word = data["item_name"].split()[0]
+
+                    # 링크에서 "//"와 "/" 사이 부분 추출
+                    link_part = re.search(r"\/\/(.*?)\/", data["end_url"])
+                    if link_part:
+                        extracted_url = link_part.group(1)
+                    else:
+                        extracted_url = data["end_url"]
+
+                    if not Items.objects.filter(
+                        Q(item_name__icontains=first_word)
+                        & Q(end_url__icontains=extracted_url)
+                        & Q(board_price=data["board_price"])
+                    ).exists():
+                        result_model = Items(
+                            item_name=data["item_name"],
+                            end_url=data["end_url"],
+                            board_url=data["board_url"],
+                            clr_update_time=current_time,
+                            board_price=data["board_price"][:30],
+                            board_description=data["board_description"],
+                            delivery_price=data["delivery_price"][:30],
+                            is_end_deal=data["is_end_deal"],
+                            category=categorize_deals(data["category"], data["item_name"]),
+                            find_item_time=current_time,
+                        )
+                        result_model.save()
+                        ce_count += 1
             else:
                 result_model = Items.objects.filter(
                     Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
@@ -320,6 +395,74 @@ def crawl_page(request):
                     result_model.delivery_price = data["delivery_price"][:30]
                     result_model.is_end_deal = data["is_end_deal"]
                     result_model.save()
+    end_time = time.time()  # 작업 종료 시간 기록
+    elapsed_time = end_time - start_time  # 작업 소요 시간 계산
+
+    print(f"쿨엔조이 작업 완료. 소요 시간: {elapsed_time:.2f} 초")
+
+    start_time = time.time()
+    # cl_crawling_function
+    result = cl_crawling_function()
+    transposed_result = list(zip(*result))
+    cl_count = 0
+    for column in transposed_result:
+        for data in column:
+            board_url = data.get("board_url", "")
+            end_url = data.get("end_url", "")
+
+            # 추가된 부분: 길이 검사
+            if len(board_url) > 500 or len(end_url) > 500:
+                continue  # 500자가 넘으면 저장하지 않음
+
+            if not Items.objects.filter(
+                Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+            ).exists():
+                if data["is_end_deal"] == False:
+                    # 첫 번째 단어 추출
+                    first_word = data["item_name"].split()[0]
+
+                    # 링크에서 "//"와 "/" 사이 부분 추출
+                    link_part = re.search(r"\/\/(.*?)\/", data["end_url"])
+                    if link_part:
+                        extracted_url = link_part.group(1)
+                    else:
+                        extracted_url = data["end_url"]
+
+                    if not Items.objects.filter(
+                        Q(item_name__icontains=first_word)
+                        & Q(end_url__icontains=extracted_url)
+                        & Q(board_price=data["board_price"])
+                    ).exists():
+                        result_model = Items(
+                            item_name=data["item_name"],
+                            end_url=data["end_url"],
+                            board_url=data["board_url"],
+                            clr_update_time=current_time,
+                            board_price=data["board_price"][:30],
+                            board_description=data["board_description"],
+                            delivery_price=data["delivery_price"][:30],
+                            is_end_deal=data["is_end_deal"],
+                            category=categorize_deals(data["category"], data["item_name"]),
+                            find_item_time=current_time,
+                        )
+                        result_model.save()
+                        cl_count += 1
+            else:
+                result_model = Items.objects.filter(
+                    Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
+                ).first()
+                if data["board_url"] == result_model.board_url:
+                    result_model.board_url = data["board_url"]
+                    result_model.clr_update_time = current_time
+                    result_model.board_price = data["board_price"][:30]
+                    result_model.board_description = data["board_description"]
+                    result_model.delivery_price = data["delivery_price"][:30]
+                    result_model.is_end_deal = data["is_end_deal"]
+                    result_model.save()
+    end_time = time.time()  # 작업 종료 시간 기록
+    elapsed_time = end_time - start_time  # 작업 소요 시간 계산
+
+    print(f"클리앙 작업 완료. 소요 시간: {elapsed_time:.2f} 초")
     # pp_crawling_function
     pp_count = 0
     # result = pp_crawling_function()
@@ -327,24 +470,47 @@ def crawl_page(request):
 
     # for column in transposed_result:
     #     for data in column:
+
+    #         board_url = data.get("board_url", "")
+    #         end_url = data.get("end_url", "")
+
+    #         # 추가된 부분: 길이 검사
+    #         if len(board_url) > 500 or len(end_url) > 500:
+    #             continue  # 500자가 넘으면 저장하지 않음
+
     #         if not Items.objects.filter(
     #             Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
     #         ).exists():
     #             if data["is_end_deal"] == False:
-    #                 result_model = Items(
-    #                     item_name=data["item_name"],
-    #                     end_url=data["end_url"],
-    #                     board_url=data["board_url"],
-    #                     clr_update_time=current_time,
-    #                     board_price="제목 참조",
-    #                     board_description=data["board_description"],
-    #                     delivery_price="제목 참조",
-    #                     is_end_deal=data["is_end_deal"],
-    #                     category=categorize_deals(data["category"]),
-    #                     find_item_time=current_time,
-    #                 )
-    #                 result_model.save()
-    #                 pp_count += 1
+    #                 # 첫 번째 단어 추출
+    #                 first_word = data["item_name"].split()[0]
+
+    #                 # 링크에서 "//"와 "/" 사이 부분 추출
+    #                 link_part = re.search(r"\/\/(.*?)\/", data["end_url"])
+    #                 if link_part:
+    #                     extracted_url = link_part.group(1)
+    #                 else:
+    #                     extracted_url = data["end_url"]
+
+    #                 if not Items.objects.filter(
+    #                     Q(item_name__icontains=first_word)
+    #                     & Q(end_url__icontains=extracted_url)
+    #                     & Q(board_price=data["board_price"])
+    #                 ).exists():
+    #                     result_model = Items(
+    #                         item_name=data["item_name"],
+    #                         end_url=data["end_url"],
+    #                         board_url=data["board_url"],
+    #                         clr_update_time=current_time,
+    #                         board_price="제목 참조",
+    #                         board_description=data["board_description"],
+    #                         delivery_price="제목 참조",
+    #                         is_end_deal=data["is_end_deal"],
+    #                         category=categorize_deals(data["category"],data["item_name"]),
+    #                         find_item_time=current_time,
+    #                     )
+    #                     result_model.save()
+    #                     pp_count += 1
     #         else:
     #             result_model = Items.objects.filter(
     #                 Q(item_name=data["item_name"]) | Q(end_url=data["end_url"])
@@ -387,12 +553,12 @@ def crawl_page(request):
 
 def item_list_by_category(request, category_id):
     # 선택한 카테고리에 해당하는 아이템들을 필터링합니다.
-    items = Items.objects.filter(category=category_id).order_by("-find_item_time")
+    items = Items.objects.filter(category=category_id).order_by("-id")
     items_per_page = 8  # 페이지당 아이템 수
     max_pages = (items.count() + items_per_page - 1) // items_per_page
 
     results = items[:items_per_page]
-    categories_in_results = Category.objects.all()
+    categories_in_results = Category.objects.all().order_by("id")
 
     for item in results:
         board_description = item.board_description
@@ -419,11 +585,11 @@ def delete_item(request, item_id):
 
 def search(request):
     query = request.GET.get("search")
-    categories = Category.objects.all()
+    categories = Category.objects.all().order_by("id")
     if query:
         results = Items.objects.filter(
             Q(item_name__icontains=query) | Q(category__name__icontains=query)
-        ).order_by("-find_item_time")
+        ).order_by("-id")
 
         items_per_page = 8  # 페이지당 아이템 수
         max_pages = (results.count() + items_per_page - 1) // items_per_page
@@ -442,7 +608,7 @@ def search(request):
             "query": query,
         }
     else:
-        all_items = Items.objects.all().order_by("-find_item_time")
+        all_items = Items.objects.all().order_by("-id")
         items_per_page = 8  # 페이지당 아이템 수
         max_pages = (all_items.count() + items_per_page - 1) // items_per_page
 
@@ -464,12 +630,12 @@ def detail(request, item_id):
 
 
 def main(request):
-    all_items = Items.objects.all().order_by("-find_item_time")
+    all_items = Items.objects.all().order_by("-id")
     items_per_page = 8  # 페이지당 아이템 수
     max_pages = (all_items.count() + items_per_page - 1) // items_per_page
 
     results = all_items[:items_per_page]
-    categories_in_results = Category.objects.all()
+    categories_in_results = Category.objects.all().order_by("id")
 
     for item in results:
         board_description = item.board_description
@@ -495,13 +661,13 @@ def load_more_items(request):
     end = start + items_per_page
 
     if category_id:
-        items = Items.objects.filter(category=category_id).order_by("-find_item_time")
+        items = Items.objects.filter(category=category_id).order_by("-id")
     elif query:
         items = results = Items.objects.filter(
             Q(item_name__icontains=query) | Q(category__name__icontains=query)
-        ).order_by("-find_item_time")
+        ).order_by("-id")
     else:
-        items = Items.objects.all().order_by("-find_item_time")
+        items = Items.objects.all().order_by("-id")
 
     results = items[start:end]
 
@@ -516,9 +682,10 @@ def load_more_items(request):
                 "item_name": item.item_name,
                 "image_url": item.image_url,
                 "board_price": item.board_price,
+                "id": item.id,
                 # 필요한 다른 필드를 여기에 추가하세요.
-            })
-          
+            }
+        )
     return JsonResponse({"items": item_data})      
 
 

@@ -112,7 +112,7 @@
                     $.get(url, data, function(data) {
                         isLoading = false;
                         // 로딩 이미지를 숨깁니다.
-        
+                        checkImageHeight();
                         if (data.items) {
                             data.items.forEach(function(item) {
                                 var id = `${item.id}`;
@@ -134,16 +134,28 @@
                                         </div>
                                     </div>
                                 </div>`;
+                            checkImageHeight(itemHtml);
                             const parentDiv = document.querySelector(".row");
                             const lastChild = parentDiv.lastElementChild;
                             lastChild.insertAdjacentHTML('afterend', itemHtml);
                             });
                             page += 1;
-                            checkImageHeight();
+
 
                         } else {
                             // 더 이상 로드할 항목이 없음을 처리
                         }
+                        function checkImageHeight() {
+                            const imgs = document.querySelectorAll('.img-container .card-img-top');
+                            const containers = document.querySelectorAll('.img-container');
+                            imgs.forEach((img, index) => {
+                              const container = containers[index];
+                              img.classList.remove('larger-image'); // 이전에 추가된 'larger-image' 클래스를 제거합니다.
+                              if (img.clientHeight < container.clientHeight) {
+                                img.classList.add('larger-image');
+                              }
+                            });
+                          }
                     });
                 }
             }
@@ -161,13 +173,15 @@
             const containers = document.querySelectorAll('.img-container');
             imgs.forEach((img, index) => {
               const container = containers[index];
-              if (img.clientHeight < container.clientHeight-50) {
+              img.classList.remove('larger-image'); // 이전에 추가된 'larger-image' 클래스를 제거합니다.
+              if (img.clientHeight < container.clientHeight) {
                 img.classList.add('larger-image');
-              } else {
-                img.classList.remove('larger-image');
               }
             });
           }
 
+          window.onload = function() {
+            checkImageHeight();
+          };
     </script>
 </html>

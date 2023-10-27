@@ -1,13 +1,13 @@
 {% load static %}
 {% load socialaccount %}
 
+
 <!DOCTYPE html>
 <html lang="en">
 
   <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/global.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'css/reset.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'css/login.css' %}"/>
@@ -19,11 +19,21 @@
     <div class="container">
       {% block content %}
         <div class="login-container">
-          <form method="post" class="login-form">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="login-button">로그인</button>
+          <form method="POST" action="{% url 'login' %}">
+            {% csrf_token %} 아이디
+            <br />
+            <input class="login-input" name="username" type="text" />
+            <br />
+            비밀번호
+            <br />
+            <input class="login-input"  name="password" type="password" />
+            <br /><br />
+            <input type="submit" class="login-button" value="Login" />
+            {% if error %}
+            <p>{{ error }}</p>
+            {% endif %}
           </form>
+
           
           <a class="social_login-button " href="{% url 'social:begin' 'google-oauth2' %}">
             <img src="{% static 'images/btn_google.svg' %}" alt="" />

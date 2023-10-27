@@ -19,6 +19,8 @@ from django.core.paginator import Paginator, EmptyPage
 from django.contrib import auth
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.contrib.auth.backends import ModelBackend
+
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -692,10 +694,6 @@ def load_more_items(request):
 # 로그인 관련
 from django.shortcuts import render
 
-def login_success(request):
-    username = request.user  # 현재 로그인된 사용자의 이름 가져오기
-    return render(request, 'main.html', {'username': username})
-
 
 def signup(request):
     if request.method == 'POST':
@@ -704,6 +702,7 @@ def signup(request):
                 username=request.POST['username'],
                 password=request.POST['password1'],
                 email=request.POST['email'],)
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
             auth.login(request, user)
             return redirect('/')
         return render(request, 'signup.html')

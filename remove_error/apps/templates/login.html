@@ -1,0 +1,50 @@
+{% load static %}
+{% load socialaccount %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/global.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/reset.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/login.css' %}"/>
+    <title>Document</title>
+  </head>
+
+  <body class="back-ye">
+    {% include "nav.html" %}
+    <div class="container">
+      {% block content %}
+        <div class="login-container">
+          <form method="post" class="login-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="login-button">로그인</button>
+          </form>
+          
+          <a class="social_login-button " href="{% url 'social:begin' 'google-oauth2' %}">
+            <img src="{% static 'images/btn_google.svg' %}" alt="" />
+            Google</a>
+          <a class="social_login-button " href="{% url 'social:begin' 'naver' %}">
+            <img src="{% static 'images/btn_naver.svg' %}" alt=""/>
+            네이버</a>
+            
+            
+          {% comment %} <a class="social_login-button " href="{% provider_login_url 'kakao' %}">
+            <img src="{% static 'images/btn_kakao.svg' %}" alt="" />
+            카카오</a>  {% endcomment %}
+
+            
+          <p class="register-reco">
+            회원이 아니신가요?
+            <a href="" class="bold">회원가입</a>
+          </p>
+        </div>
+      {% endblock %}
+    </div>
+  </body>
+
+</html>

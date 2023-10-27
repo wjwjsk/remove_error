@@ -21,7 +21,7 @@
    
     3. 테스트
    
-    4. 배포
+    4. 배포 (github master-branch change -> github webhook -> aws ec2 -> docker container jenkins -> docker container django server)
 
 ## 기술 스택
 

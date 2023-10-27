@@ -16,6 +16,7 @@ urlpatterns = [
     path('login_form/', views.login_form, name='login_form'),
     path('signup/', views.signup, name='signup'),
     path('logout/', views.logout, name='logout'),
+    path('social/', include('social_django.urls', namespace='social')),
 ]
 
     

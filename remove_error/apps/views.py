@@ -19,6 +19,8 @@ from django.core.paginator import Paginator, EmptyPage
 from django.contrib import auth
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.contrib.auth.backends import ModelBackend
+
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -704,6 +706,7 @@ def signup(request):
                 username=request.POST['username'],
                 password=request.POST['password1'],
                 email=request.POST['email'],)
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
             auth.login(request, user)
             return redirect('/')
         return render(request, 'signup.html')

@@ -5,3 +5,4 @@ migrations
 .vscode/launch.json
 *.txt
 *.json
+test

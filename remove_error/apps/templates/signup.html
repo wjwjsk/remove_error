@@ -1,21 +1,49 @@
 {% comment %} {% extends 'base.html' %} {% endcomment %} {% load bootstrap4 %}
-{% block content %}
-<div class="wrapper" style="text-align: center">
-  <h1>회원가입</h1>
-  <form method="POST">
-    {% csrf_token %} 아이디: <br />
-    <input name="username" type="text" />
-    <br />
-    비밀번호: <br />
-    <input name="password1" type="password" />
-    <br />
-    비밀번호 확인: <br />
-    <input name="password2" type="password" />
-    <br />
-    이메일: <br />
-    <input name="email" type="email" />
-    <br /><br />
-    <input type="submit" class="btn btn-primary" value="Sign Up" />
+{% load static %} {% block content %}
+<head>
+  {% comment %}
+  <link rel="stylesheet" href="{% static 'signup.css' %}" />
+  {% endcomment %}
+  <link
+    rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+  />
+</head>
+<div class="container mt-5" style="text-align: center">
+  <h1 class="mb-4">회원가입</h1>
+  <form method="POST" class="mx-auto" style="max-width: 400px">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="username">아이디:</label>
+      <input name="username" type="text" class="form-control" id="username" />
+    </div>
+
+    <div class="form-group">
+      <label for="password1">비밀번호:</label>
+      <input
+        name="password1"
+        type="password"
+        class="form-control"
+        id="password1"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="password2">비밀번호 확인:</label>
+      <input
+        name="password2"
+        type="password"
+        class="form-control"
+        id="password2"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="email">이메일:</label>
+      <input name="email" type="email" class="form-control" id="email" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">회원가입</button>
   </form>
 </div>
 {% endblock %}

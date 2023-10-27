@@ -641,9 +641,14 @@ progress {
   margin-left: auto;
 }
 
-@media (min-width: 576px) {
+.img-container{
+  height: 268px;
+  overflow: hidden;
+}
+
+@media (min-width: 480px) {
   .container-sm, .container {
-    max-width: 540px;
+    max-width: 480px;
   }
 }
 @media (min-width: 768px) {
@@ -700,7 +705,7 @@ progress {
 
 .row-cols-2 > * {
   flex: 0 0 auto;
-  width: 50%;
+  width: 90%;
 }
 
 .row-cols-3 > * {
@@ -1079,7 +1084,7 @@ progress {
   }
   .row-cols-md-3 > * {
     flex: 0 0 auto;
-    width: 33.3333333333%;
+    width: 45%;
   }
   .row-cols-md-4 > * {
     flex: 0 0 auto;
@@ -4272,8 +4277,12 @@ textarea.form-control-lg {
 
 .card-img,
 .card-img-top,
-.card-img-bottom {
+.card-img-bottom {  
   width: 100%;
+}
+
+.larger-image{
+  width: 150%;
 }
 
 .card-img,

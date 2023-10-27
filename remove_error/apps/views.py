@@ -515,6 +515,17 @@ def load_more_items(request):
                 "board_price": item.board_price,
                 # 필요한 다른 필드를 여기에 추가하세요.
             }
-        )
+          
+    return JsonResponse({"items": item_data})      
 
-    return JsonResponse({"items": item_data})
+
+# 로그인 관련
+from django.shortcuts import render
+
+def login(request):
+    return render(request, "login.html")
+
+def login_success(request):
+    username = request.user  # 현재 로그인된 사용자의 이름 가져오기
+    return render(request, 'main.html', {'username': username})
+

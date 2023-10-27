@@ -46,7 +46,45 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "phonenumber_field",
     "apps",
+    
+    # 로그인 관련
+    'social_django',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.kakao',
 ]
+
+# 로그인 관련
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '1086868206461-rngs7fvnnbei4cknc6cboq1i6qgigq6m.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
+SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = 'http://127.0.0.1:8000/complete/google-oauth2/'
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+    'social_core.backends.naver.NaverOAuth2',
+)
+
+SOCIAL_AUTH_AUTHENTICATION_BACKENDS = [
+    'social_core.backends.naver.NaverOAuth2',
+    'social_core.backends.google.GoogleOAuth2',
+]
+
+SOCIAL_AUTH_NAVER_KEY= '2jBMjNrwc89GiVyOUciI'
+SOCIAL_AUTH_NAVER_SECRET  = 'NJ1RXkGjvg'
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'login_success'
+ACCOUNT_LOGOUT_REDIRECT_URL = 'login_success'
+SOCIAL_AUTH_LOGIN_REDIRECT_URL  = 'login_success'
+
+SITE_ID = 1
+
+SOCIALACCOUNT_LOGIN_ON_GET = True
+ACCOUNT_LOGOUT_REDIRECT_URL = 'login_success'
+ACCOUNT_LOGOUT_ON_GET = True 
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

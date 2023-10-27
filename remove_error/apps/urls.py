@@ -1,6 +1,6 @@
 from django.urls import include, path
 from . import views
-from .views import *
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
      path("test/", views.test, name="test"),
@@ -17,3 +17,10 @@ urlpatterns = [
     path('signup/', views.signup, name='signup'),
     path('logout/', views.logout, name='logout'),
 ]
+
+    
+        # 로그인 관련 url
+#     path('login', views.login, name='login'),
+#     path('login_success/', views.login_success, name='login_success'),
+#     path('logout/', auth_views.LogoutView.as_view(next_page='main'), name='logout'),
+

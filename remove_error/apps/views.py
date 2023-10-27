@@ -517,7 +517,7 @@ def load_more_items(request):
                 "image_url": item.image_url,
                 "board_price": item.board_price,
                 # 필요한 다른 필드를 여기에 추가하세요.
-            }
+            })
           
     return JsonResponse({"items": item_data})      
 

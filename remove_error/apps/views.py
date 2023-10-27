@@ -16,6 +16,9 @@ import openai
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage
+from django.contrib import auth
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 
 
 # BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -522,10 +525,43 @@ def load_more_items(request):
 # 로그인 관련
 from django.shortcuts import render
 
-def login(request):
-    return render(request, "login.html")
-
 def login_success(request):
     username = request.user  # 현재 로그인된 사용자의 이름 가져오기
     return render(request, 'main.html', {'username': username})
 
+
+def signup(request):
+    if request.method == 'POST':
+        if request.POST['password1'] == request.POST['password2']:
+            user = User.objects.create_user(
+                username=request.POST['username'],
+                password=request.POST['password1'],
+                email=request.POST['email'],)
+            auth.login(request, user)
+            return redirect('/')
+        return render(request, 'signup.html')
+    return render(request, 'signup.html')
+
+def login(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            auth.login(request, user)
+            return redirect('main')
+        else:
+            return render(request, 'login.html', {'error': 'username or password is incorrect.'})
+    else:
+        return render(request, 'login.html')
+
+
+def logout(request):
+    auth.logout(request)
+    return redirect('main')
+
+def home(request):
+    return render(request, 'home.html')
+
+def login_form(request):
+    return render(request, 'login_form.html')

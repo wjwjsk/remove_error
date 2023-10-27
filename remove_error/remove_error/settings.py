@@ -46,8 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "phonenumber_field",
     "apps",
-    
-    # 로그인 관련
+    'bootstrap4'
     'social_django',
     'django.contrib.sites',
     'allauth',
@@ -57,8 +56,8 @@ INSTALLED_APPS = [
 ]
 
 # 로그인 관련
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '1086868206461-rngs7fvnnbei4cknc6cboq1i6qgigq6m.apps.googleusercontent.com'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
 SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = 'http://127.0.0.1:8000/complete/google-oauth2/'
 
 AUTHENTICATION_BACKENDS = (
@@ -73,8 +72,8 @@ SOCIAL_AUTH_AUTHENTICATION_BACKENDS = [
     'social_core.backends.google.GoogleOAuth2',
 ]
 
-SOCIAL_AUTH_NAVER_KEY= '2jBMjNrwc89GiVyOUciI'
-SOCIAL_AUTH_NAVER_SECRET  = 'NJ1RXkGjvg'
+SOCIAL_AUTH_NAVER_KEY= ''
+SOCIAL_AUTH_NAVER_SECRET  = ''
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'login_success'
 ACCOUNT_LOGOUT_REDIRECT_URL = 'login_success'
@@ -90,7 +89,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    # "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -169,6 +168,8 @@ LOGOUT_REDIRECT_URL = "/"
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [ BASE_DIR, "Static", ]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 

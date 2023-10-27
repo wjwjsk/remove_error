@@ -1,62 +1,60 @@
-{% load static %} {% load socialaccount %}
+{% load static %}
+{% load socialaccount %}
+
 
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="{% static 'css/global.css' %}"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="{% static 'css/reset.css' %}"
-    />
-    <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}" />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="{% static 'css/login.css' %}"
-    />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/reset.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/login.css' %}"/>
     <title>Document</title>
   </head>
 
   <body class="back-ye">
     {% include "nav.html" %}
-    <div class="login-container">
-      <form method="post" action="{% url 'login_form' %}" class="login-form">
-        {% csrf_token %} {{ form.as_p }}
-        <button type="submit" class="login-button">로그인</button>
-      </form>
+    <div class="container">
+      {% block content %}
+        <div class="login-container">
+          <form method="POST" action="{% url 'login' %}">
+            {% csrf_token %} 아이디
+            <br />
+            <input class="login-input" name="username" type="text" />
+            <br />
+            비밀번호
+            <br />
+            <input class="login-input"  name="password" type="password" />
+            <br /><br />
+            <input type="submit" class="login-button" value="Login" />
+            {% if error %}
+            <p>{{ error }}</p>
+            {% endif %}
+          </form>
 
-        <a
-          class="social_login-button"
-          href="{% url 'social:begin' 'google-oauth2' %}"
-        >
-          <img src="{% static 'images/btn_google.svg' %}" alt="" />
-          Google</a
-        >
-        <a class="social_login-button" href="{% url 'social:begin' 'naver' %}">
-          <img src="{% static 'images/btn_naver.svg' %}" alt="" />
-          네이버</a
-        >
+          
+          <a class="social_login-button " href="{% url 'social:begin' 'google-oauth2' %}">
+            <img src="{% static 'images/btn_google.svg' %}" alt="" />
+            Google</a>
+          <a class="social_login-button " href="{% url 'social:begin' 'naver' %}">
+            <img src="{% static 'images/btn_naver.svg' %}" alt=""/>
+            네이버</a>
+            
+            
+          {% comment %} <a class="social_login-button " href="{% provider_login_url 'kakao' %}">
+            <img src="{% static 'images/btn_kakao.svg' %}" alt="" />
+            카카오</a>  {% endcomment %}
 
-        {% comment %}
-        <a class="social_login-button" href="{% provider_login_url 'kakao' %}">
-          <img src="{% static 'images/btn_kakao.svg' %}" alt="" />
-          카카오</a
-        >
-        {% endcomment %}
-
-        <p class="register-reco">
-          회원이 아니신가요?
-          <a href="{% url 'signup' %}" class="bold">회원가입</a>
-        </p>
-      </div>
-      {% comment %} {% endblock %} {% endcomment %}
+            
+          <p class="register-reco">
+            회원이 아니신가요?
+            <a href="" class="bold">회원가입</a>
+          </p>
+        </div>
+      {% endblock %}
     </div>
   </body>
+
 </html>

@@ -694,10 +694,6 @@ def load_more_items(request):
 # 로그인 관련
 from django.shortcuts import render
 
-def login_success(request):
-    username = request.user  # 현재 로그인된 사용자의 이름 가져오기
-    return render(request, 'main.html', {'username': username})
-
 
 def signup(request):
     if request.method == 'POST':

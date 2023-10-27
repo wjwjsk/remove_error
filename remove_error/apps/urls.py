@@ -12,6 +12,8 @@ urlpatterns = [
     path("crawl/", views.crawl_page, name="crawl_page"),
     path("", views.main, name="main"),
     path("load-more-items", views.load_more_items, name="load_more_items"),
+    
+    # 로그인 관련 url
     path('login/', views.login, name='login'),
     path('login_form/', views.login_form, name='login_form'),
     path('signup/', views.signup, name='signup'),
@@ -19,9 +21,4 @@ urlpatterns = [
     path('social/', include('social_django.urls', namespace='social')),
 ]
 
-    
-        # 로그인 관련 url
-#     path('login', views.login, name='login'),
-#     path('login_success/', views.login_success, name='login_success'),
-#     path('logout/', auth_views.LogoutView.as_view(next_page='main'), name='logout'),
 

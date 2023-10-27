@@ -75,16 +75,15 @@ SOCIAL_AUTH_AUTHENTICATION_BACKENDS = [
 SOCIAL_AUTH_NAVER_KEY= json_object["OAUTH2"]["NAVER"]["KEY"]
 SOCIAL_AUTH_NAVER_SECRET  = json_object["OAUTH2"]["NAVER"]["SECRET"]
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'login_success'
-ACCOUNT_LOGOUT_REDIRECT_URL = 'login_success'
-SOCIAL_AUTH_LOGIN_REDIRECT_URL  = 'login_success'
+LOGIN_REDIRECT_URL = 'main'
+ACCOUNT_LOGOUT_REDIRECT_URL = 'main'
+SOCIAL_AUTH_LOGIN_REDIRECT_URL  = 'main'
 
 SITE_ID = 1
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
-ACCOUNT_LOGOUT_REDIRECT_URL = 'login_success'
+ACCOUNT_LOGOUT_REDIRECT_URL = 'main'
 ACCOUNT_LOGOUT_ON_GET = True 
-
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

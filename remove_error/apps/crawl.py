@@ -34,7 +34,7 @@ def json_write(data):
     # subprocess.run(["open", "page_data.json"])  # macOS
 
 
-# fmkorea
+# fmkorea(aws요청거부)
 # 10페이지
 def fm_crawling_function():
     home = "https://www.fmkorea.com"
@@ -182,11 +182,11 @@ def pp_crawling_function():
 
 
 # quasarzone
-# 5페이지 이하만 사용(페이지 자체 로드 느림)
+# 5페이지 이하만 사용(aws 요청시 페이지당 3초 이상 소요)
 def qz_crawling_function():
     home = "https://quasarzone.com"
-    datas = [[] for _ in range(int(crl_page / 2))]
-    for page in range(0, int(crl_page / 2)):
+    datas = [[] for _ in int(crl_page/2)]
+    for page in range(0, int(crl_page/2)):
         soup = insert_soup(home + "/bbs/qb_saleinfo?page=" + str(page + 1))
         list_tags = soup.select("table tbody tr")
         # 게시판 링크+제목+금액+배송비+시간
@@ -194,28 +194,29 @@ def qz_crawling_function():
             fa_lock = link.select_one(".fa-lock")
             if fa_lock is None or fa_lock.text not in "블라인드":
                 href = link.select_one(".market-info-list p a")["href"]
+                time.sleep(3)
                 in_soup = insert_soup(home + href)
-                bf_title = "".join(
-                    in_soup.select_one("dl dt .title").find_all(string=True, recursive=False)
-                ).strip()
-                title = re.sub(r"\[[^\]]+\]\s*", "", bf_title, count=1)
-                shop_url = in_soup.select_one(".market-info-view-table tr td a").text
-                board_price = in_soup.select_one(".market-info-view-table tr td span").text
-                tr = in_soup.find("th", string=re.compile("배송비"))
-                delivery_price = tr.find_next_sibling("td").get_text()
-                category = "".join(
-                    in_soup.select_one(".left .ca_name").find_all(string=True, recursive=False)
-                ).strip()
-                current_time = datetime.datetime.now()
-                formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-                # 게시글 이미지
+                temp = in_soup.select_one("dl dt .title")
+                if temp is not None:
+                    bf_title = "".join(temp.text).strip()
+                    title = re.sub(r"^[^\[]*(\[[^\]]+\]\s*)", "", bf_title, count=1)
+                    shop_url = in_soup.select_one(".market-info-view-table tr td a").text
+                    board_price = in_soup.select_one(".market-info-view-table tr td span").text
+                    tr = in_soup.find("th", string=re.compile("배송비"))
+                    delivery_price = tr.find_next_sibling("td").get_text()
+                    category = "".join(
+                        in_soup.select_one(".left .ca_name").find_all(string=True, recursive=False)
+                    ).strip()
+                    current_time = datetime.datetime.now()
+                    formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                    # 게시글 이미지
 
-                image_src_str = link.select_one(".market-info-list .maxImg")["src"]
+                    image_src_str = link.select_one(".market-info-list .maxImg")["src"]
 
-                if "label done" in in_soup.select_one("div .title span")["class"]:
-                    is_end_deal = True
-                else:
-                    is_end_deal = False
+                    if "label done" in in_soup.select_one("div .title span")["class"]:
+                        is_end_deal = True
+                    else:
+                        is_end_deal = False
             else:
                 is_end_deal = True
                 href = link.select_one(".market-info-list p a")["href"]
@@ -242,8 +243,6 @@ def qz_crawling_function():
                     "category": category,
                 }
             )
-
-            time.sleep(0.5)
 
     return datas
 
@@ -437,7 +436,7 @@ def cl_crawling_function():
 
 
 ## 크롤링 데이터확인
-# json_write(fm_crawling_function())
+# json_write(pp_crawling_function())
 
-# response = requests.get("https://www.fmkorea.com")
-# print(response.headers)
+# response = requests.get("https://m.fmkorea.com")
+# print(response)

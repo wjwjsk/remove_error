@@ -1,3 +1,5 @@
+from pathlib import Path
+import openai
 import requests, subprocess, re, datetime, time, concurrent.futures, json
 from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
@@ -7,8 +9,32 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+import psycopg2
+
+# from datetime import datetime
+
 
 crl_page = 10
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+with open("remove_error/config.json") as f:
+    json_object = json.load(f)
+
+
+# PostgreSQL 데이터베이스에 연결
+conn = psycopg2.connect(
+    dbname=json_object["DATABASES"]["NAME"],
+    user=json_object["DATABASES"]["USER"],
+    password=json_object["DATABASES"]["PASSWORD"],
+    host=json_object["DATABASES"]["HOST"],
+    port=5432,
+)
+
+cursor = conn.cursor()
+
+#     # OpenAI API 키 설정
+openai.api_key = json_object["OPENAI_API_KEY"]
 
 
 # HTML 페이지 soup에 담기
@@ -71,15 +97,15 @@ def fm_crawling_function():
 
             datas[page].append(
                 {
-                    'board_url': home + href,
-                    'item_name': title,
-                    'end_url': shop_url,
-                    'clr_update_time': formatted_time,
-                    'board_price': info_texts[0],
-                    'board_description': image_src_str,
-                    'delivery_price': info_texts[1],
-                    'is_end_deal': is_end_deal,
-                    'category': category,
+                    "board_url": home + href,
+                    "item_name": title,
+                    "end_url": shop_url,
+                    "clr_update_time": formatted_time,
+                    "board_price": info_texts[0],
+                    "board_description": image_src_str,
+                    "delivery_price": info_texts[1],
+                    "is_end_deal": is_end_deal,
+                    "category": category,
                 }
             )
 
@@ -185,8 +211,8 @@ def pp_crawling_function():
 # 5페이지 이하만 사용(aws 요청시 페이지당 3초 이상 소요)
 def qz_crawling_function():
     home = "https://quasarzone.com"
-    datas = [[] for _ in int(crl_page/2)]
-    for page in range(0, int(crl_page/2)):
+    datas = [[] for _ in range(int(crl_page / 2))]
+    for page in range(0, int(crl_page / 2)):
         soup = insert_soup(home + "/bbs/qb_saleinfo?page=" + str(page + 1))
         list_tags = soup.select("table tbody tr")
         # 게시판 링크+제목+금액+배송비+시간
@@ -440,3 +466,251 @@ def cl_crawling_function():
 
 # response = requests.get("https://m.fmkorea.com")
 # print(response)
+
+
+def categorize_deals(category, item_name):
+    if category in [
+        "PC제품",
+        "가전제품",
+        "컴퓨터",
+        "디지털",
+        "PC/하드웨어",
+        "노트북/모바일",
+        "가전/TV",
+        "전자제품",
+        "PC관련",
+        "가전",
+    ]:
+        return 6
+
+    elif category in ["의류", "의류/잡화", "패션/의류", "의류잡화"]:
+        return 7
+
+    elif category in ["먹거리", "식품/건강", "생활/식품", "식품"]:
+        return 8
+
+    elif category in ["생활용품", "가전/가구"]:
+        return 9
+
+    elif category in [
+        "패키지/이용권",
+        "상품권",
+        "세일정보",
+        "모바일/상품권",
+        "상품권/쿠폰",
+        "이벤트",
+        "쿠폰",
+    ]:
+        return 10
+
+    elif category in ["화장품"]:
+        return 11
+
+    elif category in ["SW/게임", "등산/캠핑", "게임/SW", "게임"]:
+        return 12
+
+    elif category in ["기타", "해외핫딜", "인터넷", "모바일"]:
+        product_title = item_name
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {
+                    "role": "user",
+                    "content": f"이 상품의 주요 카테고리는 무엇인가요? 전자제품 및 가전제품, 의류 및 패션 ,식품 및 식료품,홈 및 가든,할인 및 상품권,뷰티 및 화장품,스포츠 및 액티비티,기타 중 하나를 정확하고 최대한 짧게 카테고리 자체만 대답하세요. {product_title}은(는) ",
+                },
+            ],
+        )
+
+        category_ai = response["choices"][0]["message"]["content"].strip()
+        # 사전에 정의된 카테고리 목록
+        predefined_categories = [
+            "전자제품 및 가전제품",
+            "의류 및 패션",
+            "식품 및 식료품",
+            "홈 및 가든",
+            "할인 및 상품권",
+            "뷰티 및 화장품",
+            "스포츠 및 액티비티",
+        ]
+
+        category_id_mapping = {
+            "전자제품 및 가전제품": 6,
+            "의류 및 패션": 7,
+            "식품 및 식료품": 8,
+            "홈 및 가든": 9,
+            "할인 및 상품권": 10,
+            "뷰티 및 화장품": 11,
+            "스포츠 및 액티비티": 12,
+        }
+
+        for cate in predefined_categories:
+            if cate.strip() in category_ai.strip() or category_ai.strip() in cate.strip():
+                return category_id_mapping[cate]
+
+        # 미리 정의된 카테고리 목록 또는 category_ai에 없는 경우 "기타" 카테고리 반환
+        time.sleep(1)
+        return 13
+
+    return 13
+
+
+def insert_data(result):
+    # 크롤링 수행 및 추가된 레코드 수 카운트
+    current_time = datetime.datetime.now()
+
+    count = 0
+    mod_count = 0
+    transposed_result = list(zip(*result))
+    for column in transposed_result:
+        for data in column:
+            board_url = data.get("board_url", "")
+            end_url = data.get("end_url", "")
+
+            # 추가된 부분: 길이 검사
+            if len(board_url) > 500 or len(end_url) > 500:
+                continue  # 500자가 넘으면 저장하지 않음
+
+            sql_data = {"item_name": data["item_name"], "end_url": data["end_url"]}
+            # SQL 쿼리문
+            sql_query = """
+            SELECT 1 
+            FROM "Items" 
+            WHERE item_name = %(item_name)s OR end_url = %(end_url)s
+            """
+
+            # 쿼리 실행
+            cursor.execute(sql_query, sql_data)
+            result = cursor.fetchone()
+
+            if not result:
+                if data["is_end_deal"] == False:
+                    # 첫 번째 단어 추출
+                    first_word = data["item_name"].split()[0]
+
+                    # 링크에서 "//"와 "/" 사이 부분 추출
+                    link_part = re.search(r"\/\/(.*?)\/", data["end_url"])
+                    if link_part:
+                        extracted_url = link_part.group(1)
+                    else:
+                        extracted_url = data["end_url"]
+
+                    sql_data = {
+                        "first_word": first_word,
+                        "extracted_url": extracted_url,
+                        "board_price": data["board_price"],
+                    }
+
+                    # SQL 쿼리문
+                    sql_query = """
+                    SELECT 1 
+                    FROM "Items" 
+                    WHERE 
+                        item_name LIKE '%%' || %(first_word)s || '%%'
+                        AND end_url LIKE '%%' || %(extracted_url)s || '%%'
+                        AND board_price = %(board_price)s
+                    """
+                    # 쿼리 실행
+                    cursor.execute(sql_query, sql_data)
+                    query_result = cursor.fetchone()
+
+                    if not query_result:
+                        sql_data = {
+                            "item_name": data["item_name"],
+                            "end_url": data["end_url"],
+                            "board_url": data["board_url"],
+                            "clr_update_time": current_time,
+                            "board_price": data["board_price"][:30],
+                            "board_description": data["board_description"],
+                            "delivery_price": data["delivery_price"][:30],
+                            "is_end_deal": data["is_end_deal"],
+                            "category": categorize_deals(data["category"], data["item_name"]),
+                            "find_item_time": current_time,
+                            "first_price": "",
+                        }
+
+                        # SQL 쿼리문
+                        sql_query = """
+                        INSERT INTO "Items" (item_name, end_url, board_url, clr_update_time, board_price, board_description, delivery_price, is_end_deal, category_id, find_item_time, first_price)
+                        VALUES (%(item_name)s, %(end_url)s, %(board_url)s, %(clr_update_time)s, %(board_price)s, %(board_description)s, %(delivery_price)s, %(is_end_deal)s, %(category)s, %(find_item_time)s, %(first_price)s)
+                        """
+
+                        # 쿼리 실행
+                        cursor.execute(sql_query, sql_data)
+                        count += 1
+
+            else:
+                # SQL 쿼리문
+                sql_update_query = """
+                    UPDATE "Items" 
+                    SET board_url = %(board_url)s,
+                        clr_update_time = %(clr_update_time)s,
+                        board_price = %(board_price)s,
+                        board_description = %(board_description)s,
+                        delivery_price = %(delivery_price)s,
+                        is_end_deal = %(is_end_deal)s
+                    WHERE item_name = %(item_name)s OR end_url = %(end_url)s
+                """
+
+                # SQL 쿼리에 사용될 데이터
+                sql_update_data = {
+                    "board_url": data["board_url"],
+                    "clr_update_time": current_time,
+                    "board_price": data["board_price"][:30],
+                    "board_description": data["board_description"],
+                    "delivery_price": data["delivery_price"][:30],
+                    "is_end_deal": data["is_end_deal"],
+                    "item_name": data["item_name"],
+                    "end_url": data["end_url"],
+                }
+
+                # 쿼리 실행
+                cursor.execute(sql_update_query, sql_update_data)
+                # 변경 사항 커밋
+                conn.commit()
+                mod_count += 1
+
+    print(f" 새로운 데이터 : {count}")
+    print(f" 업데이트 데이터 : {mod_count}")
+
+def crawling():
+    # print("fm 시작")
+    # start_time_fm = time.time()  # fm 작업 시작 시간 기록
+    # insert_data(fm_crawling_function())
+    # end_time_fm = time.time()  # fm 작업 종료 시간 기록
+    # elapsed_time_fm = end_time_fm - start_time_fm  # fm 작업 소요 시간 계산
+    # print(f"fm 작업 완료. 소요 시간: {elapsed_time_fm:.2f} 초")
+
+    print("qz 시작")
+    start_time_qz = time.time()  # qz 작업 시작 시간 기록
+    insert_data(qz_crawling_function())
+    end_time_qz = time.time()  # qz 작업 종료 시간 기록
+    elapsed_time_qz = end_time_qz - start_time_qz  # qz 작업 소요 시간 계산
+    print(f"qz 작업 완료. 소요 시간: {elapsed_time_qz:.2f} 초")
+
+    print("al 시작")
+    start_time_al = time.time()  # al 작업 시작 시간 기록
+    insert_data(al_crawling_function())
+    end_time_al = time.time()  # al 작업 종료 시간 기록
+    elapsed_time_al = end_time_al - start_time_al  # al 작업 소요 시간 계산
+    print(f"al 작업 완료. 소요 시간: {elapsed_time_al:.2f} 초")
+
+    print("ce 시작")
+    start_time_ce = time.time()  # ce 작업 시작 시간 기록
+    insert_data(ce_crawling_function())
+    end_time_ce = time.time()  # ce 작업 종료 시간 기록
+    elapsed_time_ce = end_time_ce - start_time_ce  # ce 작업 소요 시간 계산
+    print(f"ce 작업 완료. 소요 시간: {elapsed_time_ce:.2f} 초")
+
+    print("cl 시작")
+    start_time_cl = time.time()  # cl 작업 시작 시간 기록
+    insert_data(cl_crawling_function())
+    end_time_cl = time.time()  # cl 작업 종료 시간 기록
+    elapsed_time_cl = end_time_cl - start_time_cl  # cl 작업 소요 시간 계산
+    print(f"cl 작업 완료. 소요 시간: {elapsed_time_cl:.2f} 초")
+
+crawling()
+# 연결 닫기
+cursor.close()
+conn.close()

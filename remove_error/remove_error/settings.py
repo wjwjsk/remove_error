@@ -59,7 +59,7 @@ INSTALLED_APPS = [
 ################################################################################
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = json_object["OAUTH2"]["GOOGLE"]["KEY"]
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = json_object["OAUTH2"]["GOOGLE"]["SECRET"]
-SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = 'http://127.0.0.1:8000/complete/google-oauth2/'
+SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = 'https://www.cooldeal.store/complete/google-oauth2/'
 
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOAuth2',

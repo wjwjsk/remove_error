@@ -10,7 +10,7 @@
 .signup-input{
     width: -webkit-fill-available;
     background-color: #fff;
-    border: 1px solid #fa6616;
+    border: 1px solid #495057;
     border-radius: 100px;
     padding: 13px;
 }
@@ -28,7 +28,7 @@
 
 .signup-button{
     width: 100%;
-    background-color: #fa6616;
+    background-color: #212529;
     border-radius: 100px;
     padding: 13px;
     border: none;
@@ -39,7 +39,7 @@
 }
 
 .signup-button:hover{
-    background-color: #ff823f;
+    background-color: #495057;
     transition: background-color 0.3s;
 }
 
@@ -53,7 +53,7 @@
 
 .register-reco a{
     text-decoration: none;
-    color: #ff823f;
+    color: #6c757d;
     cursor: pointer;
 }
 

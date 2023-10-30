@@ -25,18 +25,19 @@
       {% block content %}
       <div class="login-container">
         <form method="POST" action="{% url 'login' %}">
-          {% csrf_token %} 아이디
-          <br />
-          <input class="login-input" name="username" type="text" />
-          <br />
-          비밀번호
-          <br />
-          <input class="login-input" name="password" type="password" />
-          <br /><br />
+          {% csrf_token %} {% if error %}
+          <div class="error-message">
+            <p>{{ error }}</p>
+          </div>
+          {% endif %} 아이디<br />
+          <input class="login-input" name="username" type="text" /><br />
+          비밀번호<br />
+          <input
+            class="login-input"
+            name="password"
+            type="password"
+          /><br /><br />
           <input type="submit" class="login-button" value="Login" />
-          {% if error %}
-          <p>{{ error }}</p>
-          {% endif %}
         </form>
 
         <a

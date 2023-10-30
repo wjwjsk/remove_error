@@ -59,7 +59,7 @@ INSTALLED_APPS = [
 ################################################################################
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = json_object["OAUTH2"]["GOOGLE"]["KEY"]
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = json_object["OAUTH2"]["GOOGLE"]["SECRET"]
-SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = 'https://www.cooldeal.store/complete/google-oauth2/'
+SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = 'http://www.cooldeal.store/complete/google-oauth2/'
 
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOAuth2',
@@ -76,7 +76,7 @@ SOCIAL_AUTH_AUTHENTICATION_BACKENDS = [
 SOCIAL_AUTH_NAVER_KEY= json_object["OAUTH2"]["NAVER"]["KEY"]
 SOCIAL_AUTH_NAVER_SECRET  = json_object["OAUTH2"]["NAVER"]["SECRET"]
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'main'
+LOGIN_REDIRECT_URL = 'http://www.cooldeal.store/'
 ACCOUNT_LOGOUT_REDIRECT_URL = 'main'
 SOCIAL_AUTH_LOGIN_REDIRECT_URL  = 'main'
 

@@ -9,7 +9,7 @@ urlpatterns = [
     path("delete_item/<int:item_id>/", views.delete_item, name="delete_item"),
     path("search/", views.search, name="search"),
     path("detail/<int:item_id>/", views.detail, name="detail"),
-    path("crawl/", views.crawl_page, name="crawl_page"),
+    # path("crawl/", views.crawl_page, name="crawl_page"),
     path("", views.main, name="main"),
     path("load-more-items", views.load_more_items, name="load_more_items"),
     

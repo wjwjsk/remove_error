@@ -4,14 +4,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Items, Category
 from django.http import JsonResponse
 from django.db.models import Q
-from .crawl import (
-    fm_crawling_function,
-    pp_crawling_function,
-    qz_crawling_function,
-    al_crawling_function,
-    ce_crawling_function,
-    cl_crawling_function,
-)
+
 import openai
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import timezone

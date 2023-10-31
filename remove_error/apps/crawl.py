@@ -18,7 +18,7 @@ crl_page = 10
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-with open("remove_error/config.json") as f:
+with open("c:/Users/Park/Desktop/oreumi/project/remove_error/remove_error/config.json") as f:
     json_object = json.load(f)
 
 
@@ -234,6 +234,12 @@ def qz_crawling_function():
                     category = "".join(
                         in_soup.select_one(".left .ca_name").find_all(string=True, recursive=False)
                     ).strip()
+                    bf_find_item_time = in_soup.select_one(".right .date").text
+                    find_item_time = re.sub(
+                        r"(\d{4})[.-](\d{2})[.-](\d{2}) (\d{2}):(\d{2}):(\d{2})",
+                        r"\1-\2-\3 \4:\5",
+                        bf_find_item_time,
+                    ).replace(".", "-")
                     current_time = datetime.datetime.now()
                     formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
                     # 게시글 이미지
@@ -252,6 +258,7 @@ def qz_crawling_function():
                 formatted_time = "블라인드 게시글"
                 current_time = datetime.datetime.now()
                 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                find_item_time = "블라인드 게시글"
                 board_price = "블라인드 게시글"
                 image_src_str = "블라인드 게시글"
                 delivery_price = "블라인드 게시글"
@@ -263,6 +270,7 @@ def qz_crawling_function():
                     "item_name": title,
                     "end_url": shop_url,
                     "clr_update_time": formatted_time,
+                    "find_item_time": find_item_time,
                     "board_price": board_price,
                     "board_description": image_src_str,
                     "delivery_price": delivery_price,
@@ -292,6 +300,12 @@ def al_crawling_function():
                 "table tbody > tr:nth-child(3) > td:nth-child(2) span"
             ).text
             title = re.sub(r"\[[^\]]+\]\s*", "", bf_title.strip(), count=1)
+            bf_find_item_time = in_soup.select_one(".info-row .date time").text
+            find_item_time = re.sub(
+                r"(\d{4})[.-](\d{2})[.-](\d{2}) (\d{2}):(\d{2}):(\d{2})",
+                r"\1-\2-\3 \4:\5",
+                bf_find_item_time,
+            ).replace(".", "-")
             board_price = in_soup.select_one(
                 "table tbody > tr:nth-child(4) > td:nth-child(2) span"
             ).text.strip()
@@ -318,6 +332,7 @@ def al_crawling_function():
                     "item_name": title,
                     "end_url": shop_url,
                     "clr_update_time": formatted_time,
+                    "find_item_time": find_item_time,
                     "board_price": board_price,
                     "board_description": image_src_str,
                     "delivery_price": delivery_price,
@@ -357,6 +372,12 @@ def ce_crawling_function():
 
                 bf_title = in_soup.select_one("h1#bo_v_title").text.split()
                 title = " ".join(bf_title[4:])
+                bf_find_item_time = in_soup.select_one(".d-flex.align-items-center li time").text
+                find_item_time = re.sub(
+                    r"(\d{4})[.-](\d{2})[.-](\d{2}) (\d{2}):(\d{2}):(\d{2})",
+                    r"\1-\2-\3 \4:\5",
+                    bf_find_item_time,
+                ).replace(".", "-")
                 current_time = datetime.datetime.now()
                 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
                 # 게시글 이미지
@@ -377,7 +398,7 @@ def ce_crawling_function():
                 href = link.select_one(".na-subject")["href"]
                 title = "블라인드 게시글"
                 shop_url = "블라인드 게시글"
-                formatted_time = "블라인드 게시글"
+                find_item_time = "블라인드 게시글"
                 current_time = datetime.datetime.now()
                 formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
                 board_price = "블라인드 게시글"
@@ -390,6 +411,7 @@ def ce_crawling_function():
                     "item_name": title,
                     "end_url": shop_url,
                     "clr_update_time": formatted_time,
+                    "find_item_time": find_item_time,
                     "board_price": board_price,
                     "board_description": image_src_str,
                     "delivery_price": "본문참조",
@@ -422,6 +444,12 @@ def cl_crawling_function():
             else:
                 is_end_deal = False
             in_soup = insert_soup(home + href)
+            bf_find_item_time = in_soup.select_one(".post_view .post_author span").text.rsplit("수정일 : ")[-1]
+            find_item_time = re.sub(
+                r"(\d{4})[.-](\d{2})[.-](\d{2}) (\d{2}):(\d{2}):(\d{2})",
+                r"\1-\2-\3 \4:\5",
+                bf_find_item_time,
+            ).strip().replace(".", "-")
             outlink = in_soup.select_one(".outlink .url")
             if outlink is not None and outlink.text:
                 shop_url = in_soup.select_one(".outlink .url").text
@@ -445,6 +473,7 @@ def cl_crawling_function():
                     "board_url": home + href,
                     "item_name": title,
                     "end_url": shop_url,
+                    "find_item_time": find_item_time,
                     "clr_update_time": formatted_time,
                     "board_price": "본문참조",
                     "board_description": image_src_str,
@@ -625,6 +654,7 @@ def insert_data(result):
                             "end_url": data["end_url"],
                             "board_url": data["board_url"],
                             "clr_update_time": current_time,
+                            "find_item_time": data["find_item_time"],
                             "board_price": data["board_price"][:30],
                             "board_description": data["board_description"],
                             "delivery_price": data["delivery_price"][:30],
@@ -636,8 +666,8 @@ def insert_data(result):
 
                         # SQL 쿼리문
                         sql_query = """
-                        INSERT INTO "Items" (item_name, end_url, board_url, clr_update_time, board_price, board_description, delivery_price, is_end_deal, category_id, find_item_time, first_price)
-                        VALUES (%(item_name)s, %(end_url)s, %(board_url)s, %(clr_update_time)s, %(board_price)s, %(board_description)s, %(delivery_price)s, %(is_end_deal)s, %(category)s, %(find_item_time)s, %(first_price)s)
+                        INSERT INTO "Items" (item_name, end_url, board_url, clr_update_time, find_item_time, board_price, board_description, delivery_price, is_end_deal, category_id, first_price)
+                        VALUES (%(item_name)s, %(end_url)s, %(board_url)s, %(clr_update_time)s, %(find_item_time)s ,%(board_price)s, %(board_description)s, %(delivery_price)s, %(is_end_deal)s, %(category)s, %(first_price)s)
                         """
 
                         # 쿼리 실행
@@ -650,6 +680,7 @@ def insert_data(result):
                     UPDATE "Items" 
                     SET board_url = %(board_url)s,
                         clr_update_time = %(clr_update_time)s,
+                        find_item_time = %(find_item_time)s,
                         board_price = %(board_price)s,
                         board_description = %(board_description)s,
                         delivery_price = %(delivery_price)s,
@@ -661,6 +692,7 @@ def insert_data(result):
                 sql_update_data = {
                     "board_url": data["board_url"],
                     "clr_update_time": current_time,
+                    "find_item_time": data["find_item_time"],
                     "board_price": data["board_price"][:30],
                     "board_description": data["board_description"],
                     "delivery_price": data["delivery_price"][:30],
@@ -713,7 +745,7 @@ def crawling():
     json_write(cl_crawling_function(), "cl_crawling")
     end_time_cl = time.time()  # cl 작업 종료 시간 기록
     elapsed_time_cl = end_time_cl - start_time_cl  # cl 작업 소요 시간 계산
-    print(f"cl 작업 완료. 소요 시간: {elapsed_time_cl:.2f} 초")
+
 
 
 def load_data_and_insert(file_name):

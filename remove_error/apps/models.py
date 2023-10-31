@@ -9,8 +9,8 @@ from datetime import datetime
 class Items(models.Model):
     item_name = models.CharField(max_length=500) # 커뮤 게시글 제목
     end_url = models.CharField(max_length=500) # 커뮤 게시글상 구매페이지 URL
-    clr_update_time = models.DateTimeField(default=datetime.now, blank=True) # 마지막 크롤링로 내부 게시글 업데이트된 시간
-    find_item_time = models.DateTimeField(default=datetime.now, blank=True) # 핫딜아이템 생성 시간(크롤링으로 신규 아이템등록된 시간)
+    clr_update_time = models.DateTimeField(default=datetime.now, blank=True) # 마지막 크롤링로 내부 게시글 업데이트된 시간 
+    find_item_time = models.CharField(max_length=50) # 핫딜아이템 생성 시간(크롤링으로 신규 아이템등록된 시간)
     board_price = models.CharField(max_length=30) # 커뮤 게시글상 현재 가격
     board_description = models.TextField() # 커뮤 게시글상 설명(이미지 제외)
     board_url = models.CharField(max_length=500, default="") # 커뮤 게시글 URL
@@ -18,6 +18,7 @@ class Items(models.Model):
     delivery_price = models.CharField(max_length=30,null=True) # 게시글 상 배송비(있을 경우에만)
     is_end_deal = models.BooleanField(default=False) # 게시글 삭제 여부 
     category = models.ForeignKey("Category", on_delete=models.CASCADE, null=True, blank=True) 
+    hits = models.IntegerField(default=0,null=True) 
 
     class Meta:
         db_table = "Items"

@@ -46,45 +46,43 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "phonenumber_field",
     "apps",
-    
-    'social_django',
-    'django.contrib.sites',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.kakao',
+    "social_django",
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
 ]
 
 # 로그인 관련
 ################################################################################
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = json_object["OAUTH2"]["GOOGLE"]["KEY"]
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = json_object["OAUTH2"]["GOOGLE"]["SECRET"]
-SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = 'http://www.cooldeal.store/complete/google-oauth2/'
+SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = "http://www.cooldeal.store/complete/google-oauth2/"
 
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.google.GoogleOAuth2',
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-    'social_core.backends.naver.NaverOAuth2',
+    "social_core.backends.google.GoogleOAuth2",
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+    "social_core.backends.naver.NaverOAuth2",
 )
 
 SOCIAL_AUTH_AUTHENTICATION_BACKENDS = [
-    'social_core.backends.naver.NaverOAuth2',
-    'social_core.backends.google.GoogleOAuth2',
+    "social_core.backends.naver.NaverOAuth2",
+    "social_core.backends.google.GoogleOAuth2",
 ]
 
-SOCIAL_AUTH_NAVER_KEY= json_object["OAUTH2"]["NAVER"]["KEY"]
-SOCIAL_AUTH_NAVER_SECRET  = json_object["OAUTH2"]["NAVER"]["SECRET"]
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'main'
-ACCOUNT_LOGOUT_REDIRECT_URL = 'main'
-SOCIAL_AUTH_LOGIN_REDIRECT_URL  = 'main'
+SOCIAL_AUTH_NAVER_KEY = json_object["OAUTH2"]["NAVER"]["KEY"]
+SOCIAL_AUTH_NAVER_SECRET = json_object["OAUTH2"]["NAVER"]["SECRET"]
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "main"
+ACCOUNT_LOGOUT_REDIRECT_URL = "main"
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = "main"
 
 SITE_ID = 1
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
-ACCOUNT_LOGOUT_REDIRECT_URL = 'main'
-ACCOUNT_LOGOUT_ON_GET = True 
+ACCOUNT_LOGOUT_REDIRECT_URL = "main"
+ACCOUNT_LOGOUT_ON_GET = True
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -94,7 +92,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "allauth.account.middleware.AccountMiddleware"
+    "allauth.account.middleware.AccountMiddleware",
 ]
 ################################################################################
 
@@ -181,5 +179,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTHENTICATION_ERROR_MESSAGES = {
-    'invalid_login': "아이디 또는 비밀번호가 올바르지 않습니다. 다시 시도해주세요.",
+    "invalid_login": "아이디 또는 비밀번호가 올바르지 않습니다. 다시 시도해주세요.",
 }

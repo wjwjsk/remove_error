@@ -14,6 +14,9 @@
         <link rel="stylesheet" type="text/css" href="{% static "css/nav.css" %}"/>
         <link rel="stylesheet" type="text/css" href="{% static 'css/footer.css' %}"/>
         <link href="{% static "css/swiper.min.css" %}" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap" rel="stylesheet">
     </head>
     <body>
         {% include "nav.html" %}
@@ -66,7 +69,7 @@
 
         <!-- Footer-->
         <footer class="py-5 bg-dark">
-            <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Your Website 2023</p></div>
+            <div class="container"><p class="m-0 text-center text-white">Copyright &copy; cooldeal 2023</p></div>
         </footer>
 
         <div id="modal">
@@ -118,6 +121,4 @@ var swiper = new Swiper('.swiper-container', {
 
         </script>
     </body>
-    <!-- Footer-->
-    {% include "footer.html" %}
 </html>

@@ -1,7 +1,7 @@
 /* 공통 스타일 */
 body {
     background-color: #f5f5f5 !important; 
-    font-family: Arial, sans-serif;
+    font-family: 'Noto Sans KR', sans-serif;
 }
 
 .container {

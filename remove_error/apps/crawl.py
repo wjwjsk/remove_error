@@ -52,11 +52,12 @@ def txt_write(url):
     subprocess.run(["start", "page_html.txt"], shell=True)  # Windows
 
 
-def json_write(data):
+def json_write(data, file_name):
     json_data = json.dumps(data, indent=4, ensure_ascii=False)
-    with open("page_data.json", "w", encoding="utf-8") as file:
+    with open(f"{file_name}.json", "w", encoding="utf-8") as file:
         file.write(json_data)
-    subprocess.run(["start", "page_data.json"], shell=True)  # Windows
+    # subprocess.run(["start", f"{file_name}.json"], shell=True)  # Windows
+
     # subprocess.run(["open", "page_data.json"])  # macOS
 
 
@@ -512,6 +513,8 @@ def categorize_deals(category, item_name):
     elif category in ["기타", "해외핫딜", "인터넷", "모바일"]:
         product_title = item_name
 
+        time.sleep(1)
+
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -524,6 +527,7 @@ def categorize_deals(category, item_name):
         )
 
         category_ai = response["choices"][0]["message"]["content"].strip()
+        print(f"{product_title} 기존 카테고리: {category} = > 예측 카테고리 :{category_ai}")
         # 사전에 정의된 카테고리 목록
         predefined_categories = [
             "전자제품 및 가전제품",
@@ -547,10 +551,10 @@ def categorize_deals(category, item_name):
 
         for cate in predefined_categories:
             if cate.strip() in category_ai.strip() or category_ai.strip() in cate.strip():
+                print(f"{product_title} : 결과 기존 카테고리: {category} -> {cate}")
                 return category_id_mapping[cate]
 
         # 미리 정의된 카테고리 목록 또는 category_ai에 없는 경우 "기타" 카테고리 반환
-        time.sleep(1)
         return 13
 
     return 13
@@ -674,6 +678,7 @@ def insert_data(result):
     print(f" 새로운 데이터 : {count}")
     print(f" 업데이트 데이터 : {mod_count}")
 
+
 def crawling():
     # print("fm 시작")
     # start_time_fm = time.time()  # fm 작업 시작 시간 기록
@@ -684,33 +689,63 @@ def crawling():
 
     print("qz 시작")
     start_time_qz = time.time()  # qz 작업 시작 시간 기록
-    insert_data(qz_crawling_function())
+    json_write(qz_crawling_function(), "qz_crawling")
     end_time_qz = time.time()  # qz 작업 종료 시간 기록
     elapsed_time_qz = end_time_qz - start_time_qz  # qz 작업 소요 시간 계산
     print(f"qz 작업 완료. 소요 시간: {elapsed_time_qz:.2f} 초")
 
     print("al 시작")
     start_time_al = time.time()  # al 작업 시작 시간 기록
-    insert_data(al_crawling_function())
+    json_write(al_crawling_function(), "al_crawling")
     end_time_al = time.time()  # al 작업 종료 시간 기록
     elapsed_time_al = end_time_al - start_time_al  # al 작업 소요 시간 계산
     print(f"al 작업 완료. 소요 시간: {elapsed_time_al:.2f} 초")
 
     print("ce 시작")
     start_time_ce = time.time()  # ce 작업 시작 시간 기록
-    insert_data(ce_crawling_function())
+    json_write(ce_crawling_function(), "ce_crawling")
     end_time_ce = time.time()  # ce 작업 종료 시간 기록
     elapsed_time_ce = end_time_ce - start_time_ce  # ce 작업 소요 시간 계산
     print(f"ce 작업 완료. 소요 시간: {elapsed_time_ce:.2f} 초")
 
     print("cl 시작")
     start_time_cl = time.time()  # cl 작업 시작 시간 기록
-    insert_data(cl_crawling_function())
+    json_write(cl_crawling_function(), "cl_crawling")
     end_time_cl = time.time()  # cl 작업 종료 시간 기록
     elapsed_time_cl = end_time_cl - start_time_cl  # cl 작업 소요 시간 계산
     print(f"cl 작업 완료. 소요 시간: {elapsed_time_cl:.2f} 초")
 
+
+def load_data_and_insert(file_name):
+    max_attempts = 3  # 최대 시도 횟수
+    current_attempt = 0
+
+    while current_attempt < max_attempts:
+        try:
+            with open(f"{file_name}.json", "r", encoding="utf-8") as file:
+                json_data = json.load(file)
+                insert_data(json_data)
+                break  # 성공하면 반복문 탈출
+        except Exception as e:
+            print(f"에러 발생: {e}")
+            print("다시 시도합니다...")
+            current_attempt += 1
+    else:
+        print(f"{max_attempts}번 시도했지만 에러가 계속 발생했습니다. 작업을 중단합니다.")
+
+
+def input_db():
+    try:
+        load_data_and_insert("qz_crawling")
+        load_data_and_insert("al_crawling")
+        load_data_and_insert("ce_crawling")
+        load_data_and_insert("cl_crawling")
+    except Exception as e:
+        print(f"에러 발생: {e}")
+
+
 crawling()
+input_db()
 # 연결 닫기
 cursor.close()
 conn.close()

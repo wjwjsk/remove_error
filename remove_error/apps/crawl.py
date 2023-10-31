@@ -745,6 +745,8 @@ def crawling():
     json_write(cl_crawling_function(), "cl_crawling")
     end_time_cl = time.time()  # cl 작업 종료 시간 기록
     elapsed_time_cl = end_time_cl - start_time_cl  # cl 작업 소요 시간 계산
+    print(f"cl 작업 완료. 소요 시간: {elapsed_time_cl:.2f} 초")
+
 
 
 

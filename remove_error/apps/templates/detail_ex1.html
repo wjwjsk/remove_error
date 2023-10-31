@@ -11,7 +11,8 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
         <!-- Core theme CSS (includes Bootstrap)-->
         <link rel="stylesheet" type="text/css" href="{% static 'css/detail_ex1.css' %}" />
-        <link href="{% static "css/nav.css" %}" rel="stylesheet"> 
+        <link rel="stylesheet" type="text/css" href="{% static "css/nav.css" %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/footer.css' %}"/>
         <link href="{% static "css/swiper.min.css" %}" rel="stylesheet">
     </head>
     <body>
@@ -117,4 +118,6 @@ var swiper = new Swiper('.swiper-container', {
 
         </script>
     </body>
+    <!-- Footer-->
+    {% include "footer.html" %}
 </html>

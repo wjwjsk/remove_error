@@ -279,18 +279,27 @@ from django.shortcuts import render
 
 
 def signup(request):
-    if request.method == "POST":
-        if request.POST["password1"] == request.POST["password2"]:
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+
+        if not (username and password1 and password2):
+           return render(request, 'signup.html', {'error': '모든 값을 입력해야 합니다.'})
+
+        if password1 == password2:
             user = User.objects.create_user(
-                username=request.POST["username"],
-                password=request.POST["password1"],
-                email=request.POST["email"],
-            )
-            user.backend = "django.contrib.auth.backends.ModelBackend"
+                username=username,
+                password=password1,)
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
             auth.login(request, user)
-            return redirect("/")
-        return render(request, "signup.html")
-    return render(request, "signup.html")
+            return redirect('/')
+        else:
+            return render(request, 'signup.html', {'error': '비밀번호가 일치하지 않습니다.'})
+    
+    return render(request, 'signup.html')
+
 
 
 def login(request):

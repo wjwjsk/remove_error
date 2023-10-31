@@ -5,6 +5,7 @@
     justify-content: center;
     flex-direction: column;
     margin: auto;
+    position: relative;
 }
 
 
@@ -90,3 +91,14 @@ button:hover{
   transition: box-shadow 0.3s ease;
 }
 
+.error-message {
+    position: absolute; /* 절대 위치 설정 */
+    top: -40px; /* 아이디 입력 창 위로 이동 */
+    left: 50%; /* 가운데 정렬 */
+    transform: translateX(-50%); /* 가운데 정렬을 위한 변형 적용 */
+    text-align: center;
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 5px;
+  }

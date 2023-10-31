@@ -666,14 +666,13 @@ def insert_data(result):
                             "delivery_price": data["delivery_price"][:30],
                             "is_end_deal": data["is_end_deal"],
                             "category": categorize_deals(data["category"], data["item_name"]),
-                            "find_item_time": current_time,
                             "first_price": "",
                         }
 
                         # SQL 쿼리문
                         sql_query = """
-                        INSERT INTO "Items" (item_name, end_url, board_url, clr_update_time, find_item_time, board_price, board_description, delivery_price, is_end_deal, category_id, first_price)
-                        VALUES (%(item_name)s, %(end_url)s, %(board_url)s, %(clr_update_time)s, %(find_item_time)s ,%(board_price)s, %(board_description)s, %(delivery_price)s, %(is_end_deal)s, %(category)s, %(first_price)s)
+                        INSERT INTO "Items" (item_name, end_url, board_url, clr_update_time, find_item_time, board_price, board_description, delivery_price, is_end_deal, category_id, first_price, hits)
+                        VALUES (%(item_name)s, %(end_url)s, %(board_url)s, %(clr_update_time)s, %(find_item_time)s ,%(board_price)s, %(board_description)s, %(delivery_price)s, %(is_end_deal)s, %(category)s, %(first_price)s, 0)
                         """
 
                         # 쿼리 실행
@@ -782,8 +781,8 @@ def input_db():
         print(f"에러 발생: {e}")
 
 
-crawling()
-input_db()
+# crawling()
+# input_db()
 # 연결 닫기
 cursor.close()
 conn.close()

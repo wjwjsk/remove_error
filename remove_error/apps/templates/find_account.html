@@ -1,0 +1,25 @@
+{% load static %} {% load socialaccount %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head> </head>
+
+  <body class="back-ye">
+    {% include "nav.html" %}
+    <div class="container">
+      {% block content %}
+      <div class="login-container">
+        <form method="POST" action="{% url 'find_account' %}">
+          {% csrf_token %} {% if error %}
+          <div class="error-message">
+            <p>{{ error }}</p>
+          </div>
+          {% endif %} 이메일<br />
+          <input class="login-input" name="email" type="text" /><br />
+          <input type="submit" class="login-button" value="Submit" />
+        </form>
+      </div>
+      {% endblock %}
+    </div>
+  </body>
+</html>

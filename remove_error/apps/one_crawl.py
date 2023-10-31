@@ -61,8 +61,6 @@ def json_write(data, file_name):
     # subprocess.run(["open", "page_data.json"])  # macOS
 
 
-
-
 # quasarzone
 # 5페이지 이하만 사용(aws 요청시 페이지당 3초 이상 소요)
 def qz_crawling_function():
@@ -521,14 +519,13 @@ def insert_data(result):
                             "delivery_price": data["delivery_price"][:30],
                             "is_end_deal": data["is_end_deal"],
                             "category": categorize_deals(data["category"], data["item_name"]),
-                            "find_item_time": current_time,
                             "first_price": "",
                         }
 
                         # SQL 쿼리문
                         sql_query = """
-                        INSERT INTO "Items" (item_name, end_url, board_url, clr_update_time, find_item_time, board_price, board_description, delivery_price, is_end_deal, category_id, first_price)
-                        VALUES (%(item_name)s, %(end_url)s, %(board_url)s, %(clr_update_time)s, %(find_item_time)s ,%(board_price)s, %(board_description)s, %(delivery_price)s, %(is_end_deal)s, %(category)s, %(first_price)s)
+                        INSERT INTO "Items" (item_name, end_url, board_url, clr_update_time, find_item_time, board_price, board_description, delivery_price, is_end_deal, category_id, first_price, hits)
+                        VALUES (%(item_name)s, %(end_url)s, %(board_url)s, %(clr_update_time)s, %(find_item_time)s ,%(board_price)s, %(board_description)s, %(delivery_price)s, %(is_end_deal)s, %(category)s, %(first_price)s, 0)
                         """
 
                         # 쿼리 실행
@@ -573,7 +570,6 @@ def insert_data(result):
 
 
 def crawling():
-
     print("qz 시작")
     start_time_qz = time.time()  # qz 작업 시작 시간 기록
     json_write(qz_crawling_function(), "qz_crawling")

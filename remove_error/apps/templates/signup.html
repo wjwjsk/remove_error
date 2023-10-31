@@ -1,24 +1,4 @@
-
-{% comment %} {% extends 'base.html' %} {% load bootstrap4 %} {% endcomment %}
-{% load static %} {% block content %}
-<head>
-  {% comment %}
-  <link rel="stylesheet" href="{% static 'signup.css' %}" />
-  {% endcomment %}
-  <link
-    rel="stylesheet"
-    href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-  />
-</head>
-<div class="container mt-5" style="text-align: center">
-  <h1 class="mb-4">회원가입</h1>
-  <form method="POST" class="mx-auto" style="max-width: 400px">
-    {% csrf_token %}
-    <div class="form-group">
-      <label for="username">아이디:</label>
-      <input name="username" type="text" class="form-control" id="username" />
-    </div>
-
+{% load static %} 
 
 <!DOCTYPE html>
 <html lang="en">
@@ -44,15 +24,15 @@
         <div class="signup-container">
             <h1 class="mb-4">회원가입</h1>
             <form method="POST" class="signup-form" style="max-width: 400px">
-                {% csrf_token %}
-
-                {% if error %}
-                <div class="alert alert-danger" role="alert">
-                  {{ error }}
-                </div>
-                {% endif %}
-
-                <div class="form-group">
+              {% csrf_token %}
+          
+              {% if error %}
+              <div class="alert alert-danger" role="alert">
+                {{ error }}
+              </div>
+              {% endif %}
+          
+              <div class="form-group">
                   <label for="username">아이디:</label>
                   <input
                     name="username"
@@ -65,6 +45,9 @@
           
                 <div class="form-group">
                   <label for="password1">비밀번호:</label>
+                  <small id="passwordHelp" class="form-text text-muted">
+                    비밀번호는 !, @, #, $, %, ^, &, *, (, ), _, +, =, - 중 하나 이상을 포함하고 8자 이상이어야 합니다.
+                  </small>
                   <input
                     name="password1"
                     type="password"
@@ -82,6 +65,17 @@
                     class="form-control signup-input"
                     id="password2"
                     required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="email">이메일:</label>
+                  <input
+                      name="email"
+                      type="email"
+                      class="form-control signup-input"
+                      id="email"
+                      required
                   />
                 </div>
           

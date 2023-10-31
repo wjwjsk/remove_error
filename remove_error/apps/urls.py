@@ -1,6 +1,7 @@
 from django.urls import include, path
 from . import views
 from django.contrib.auth import views as auth_views
+from .views import find_account
 
 urlpatterns = [
      path("test/", views.test, name="test"),
@@ -19,6 +20,7 @@ urlpatterns = [
     path('signup/', views.signup, name='signup'),
     path('logout/', views.logout, name='logout'),
     path('social/', include('social_django.urls', namespace='social')),
+    path('find_account/', find_account, name='find_account'),
 ]
 
 

@@ -14,6 +14,12 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.backends import ModelBackend
 
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes
+from django.core.mail import EmailMessage
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 with open("remove_error/config.json") as f:
@@ -275,31 +281,42 @@ def load_more_items(request):
 
 
 # 로그인 관련
-from django.shortcuts import render
-
-
 def signup(request):
-
     if request.method == 'POST':
         username = request.POST.get('username')
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
+        email = request.POST.get('email')
 
-        if not (username and password1 and password2):
-           return render(request, 'signup.html', {'error': '모든 값을 입력해야 합니다.'})
+        if not (username and password1 and password2 and email):
+            return render(request, 'signup.html', {'error': '모든 값을 입력해야 합니다.'})
+
+        username_regex = re.compile('^[a-zA-Z0-9]+$')
+        if not username_regex.match(username):
+            return render(request, 'signup.html', {'error': '아이디는 영문자와 숫자만 가능합니다.'})
+
+        if User.objects.filter(username=username).exists():
+            return render(request, 'signup.html', {'error': '이미 존재하는 아이디입니다.'})
+
+        if User.objects.filter(email=email).exists():
+            return render(request, 'signup.html', {'error': '이미 사용중인 이메일입니다.'})
+
+        password_regex = re.compile('^(?=.*[!@#$%^&*()_+=-])(?=.*[a-zA-Z0-9]).{8,}$')
+
+        if not password_regex.match(password1):
+            return render(request, 'signup.html', {'error': '비밀번호는 8자 이상이며, 특수문자를 포함해야 합니다.'})
 
         if password1 == password2:
-            user = User.objects.create_user(
-                username=username,
-                password=password1,)
+            user = User.objects.create_user(username=username, email=email)
+            user.set_password(password1)
+            user.save()
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             auth.login(request, user)
             return redirect('/')
         else:
             return render(request, 'signup.html', {'error': '비밀번호가 일치하지 않습니다.'})
-    
-    return render(request, 'signup.html')
 
+    return render(request, 'signup.html')
 
 
 def login(request):
@@ -327,3 +344,27 @@ def home(request):
 
 def login_form(request):
     return render(request, "login_form.html")
+
+
+def find_account(request):
+    if request.method == "POST":
+        email = request.POST["email"]
+        if User.objects.filter(email=email).exists():
+            user = User.objects.get(email=email)
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            mail_subject = 'Reset your password'
+            message = render_to_string('find_account_email.html', {
+                'user': user,
+                'domain': request.META['HTTP_HOST'],
+                'uid': uid,
+                'token': token,
+            })
+            to_email = email
+            email = EmailMessage(mail_subject, message, to=[to_email])
+            email.send()
+            return render(request, 'find_account_done.html')
+        else:
+            return render(request, "find_account.html", {"error": "해당 이메일이 존재하지 않습니다."})
+    else:
+        return render(request, "find_account.html")

@@ -288,7 +288,7 @@ def signup(request):
         password2 = request.POST.get('password2')
         email = request.POST.get('email')
 
-        if not (username and password1 and password2 and email):
+        if not (username and password1 and password2): #and email):#
             return render(request, 'signup.html', {'error': '모든 값을 입력해야 합니다.'})
 
         username_regex = re.compile('^[a-zA-Z0-9]+$')
@@ -307,7 +307,7 @@ def signup(request):
             return render(request, 'signup.html', {'error': '비밀번호는 8자 이상이며, 특수문자를 포함해야 합니다.'})
 
         if password1 == password2:
-            user = User.objects.create_user(username=username, email=email)
+            user = User.objects.create_user(username=username) #email=email)
             user.set_password(password1)
             user.save()
             user.backend = 'django.contrib.auth.backends.ModelBackend'

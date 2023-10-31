@@ -52,12 +52,15 @@
           네이버</a
         >
 
-
         {% comment %}
         <a class="social_login-button" href="{% provider_login_url 'kakao' %}">
           <img src="{% static 'images/btn_kakao.svg' %}" alt="" />
           카카오</a
         >
+        {% endcomment %} {% comment %}
+        <p>
+          <a href="{% url 'find_account' %}">아이디 찾기</a>
+        </p>
         {% endcomment %}
 
         <p class="register-reco">

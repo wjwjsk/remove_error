@@ -3,7 +3,7 @@ from pathlib import Path
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Items, Category
 from django.http import JsonResponse
-from django.db.models import Q
+from django.db.models import Q, F
 
 import openai
 from django.core.exceptions import ImproperlyConfigured
@@ -15,94 +15,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.backends import ModelBackend
 
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-with open("remove_error/config.json") as f:
-    json_object = json.load(f)
-
-
-#     # OpenAI API 키 설정
-
-
-openai.api_key = json_object["OPENAI_API_KEY"]
-
-
-def categorize_deals(category, item_name):
-    if category in [
-        "PC제품",
-        "가전제품",
-        "컴퓨터",
-        "디지털",
-        "PC/하드웨어",
-        "노트북/모바일",
-        "가전/TV",
-        "전자제품",
-        "PC관련",
-        "가전",
-    ]:
-        return Category.objects.get(name="전자제품 및 가전제품")
-
-    elif category in ["의류", "의류/잡화", "패션/의류", "의류잡화"]:
-        return Category.objects.get(name="의류 및 패션")
-
-    elif category in ["먹거리", "식품/건강", "생활/식품", "식품"]:
-        return Category.objects.get(name="식품 및 식료품")
-
-    elif category in ["생활용품", "가전/가구"]:
-        return Category.objects.get(name="홈 및 가든")
-
-    elif category in [
-        "패키지/이용권",
-        "상품권",
-        "세일정보",
-        "모바일/상품권",
-        "상품권/쿠폰",
-        "이벤트",
-        "쿠폰",
-    ]:
-        return Category.objects.get(name="할인 및 상품권")
-
-    elif category in ["화장품"]:
-        return Category.objects.get(name="뷰티 및 화장품")
-
-    elif category in ["SW/게임", "등산/캠핑", "게임/SW", "게임"]:
-        return Category.objects.get(name="스포츠 및 액티비티")
-
-    elif category in ["기타", "해외핫딜", "인터넷", "모바일"]:
-        product_title = item_name
-
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {
-                    "role": "user",
-                    "content": f"이 상품의 주요 카테고리는 무엇인가요? 전자제품 및 가전제품, 의류 및 패션 ,식품 및 식료품,홈 및 가든,할인 및 상품권,뷰티 및 화장품,스포츠 및 액티비티,기타 중 하나를 정확하고 최대한 짧게 카테고리 자체만 대답하세요. {product_title}은(는) ",
-                },
-            ],
-        )
-
-        category_ai = response["choices"][0]["message"]["content"].strip()
-        print(f"{product_title} 기존 카테고리: {category} = > 예측 카테고리 :{category_ai}")
-        # 사전에 정의된 카테고리 목록
-        predefined_categories = [
-            "전자제품 및 가전제품",
-            "의류 및 패션",
-            "식품 및 식료품",
-            "홈 및 가든",
-            "할인 및 상품권",
-            "뷰티 및 화장품",
-            "스포츠 및 액티비티",
-        ]
-
-        for cate in predefined_categories:
-            if cate.strip() in category_ai.strip() or category_ai.strip() in cate.strip():
-                print(f"{product_title} : 결과 기존 카테고리: {category} -> {cate}")
-                return Category.objects.get(name=cate)
-
-        # 미리 정의된 카테고리 목록 또는 category_ai에 없는 경우 "기타" 카테고리 반환
-        return Category.objects.get(name="기타")
-
-    return Category.objects.get(name="기타")
+items_url = []
 
 
 def test(request):
@@ -120,8 +33,6 @@ def test(request):
 
 # 크롤링 페이지
 def crawl_page(request):
-    
-
     # crawl_page.html 템플릿 렌더링
     return render(request, "crawl_page.html")
 
@@ -138,7 +49,7 @@ def crawl_page(request):
 
 def item_list_by_category(request, category_id):
     # 선택한 카테고리에 해당하는 아이템들을 필터링합니다.
-    items = Items.objects.filter(category=category_id).order_by("-id")
+    items = Items.objects.filter(category=category_id).order_by("-find_item_time")
     items_per_page = 8  # 페이지당 아이템 수
     max_pages = (items.count() + items_per_page - 1) // items_per_page
 
@@ -174,7 +85,7 @@ def search(request):
     if query:
         results = Items.objects.filter(
             Q(item_name__icontains=query) | Q(category__name__icontains=query)
-        ).order_by("-id")
+        ).order_by("-find_item_time")
 
         items_per_page = 8  # 페이지당 아이템 수
         max_pages = (results.count() + items_per_page - 1) // items_per_page
@@ -193,7 +104,7 @@ def search(request):
             "query": query,
         }
     else:
-        all_items = Items.objects.all().order_by("-id")
+        all_items = Items.objects.all().order_by("-find_item_time")
         items_per_page = 8  # 페이지당 아이템 수
         max_pages = (all_items.count() + items_per_page - 1) // items_per_page
 
@@ -208,6 +119,9 @@ def search(request):
 
 def detail(request, item_id):
     item = Items.objects.get(id=item_id)
+    # 조회수 1 증가
+    Items.objects.filter(id=item_id).update(hits=F("hits") + 1)
+
     board_description = item.board_description
     image_urls = board_description.split("<br>")
     item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
@@ -215,12 +129,20 @@ def detail(request, item_id):
 
 
 def main(request):
-    all_items = Items.objects.all().order_by("-id")
+    all_items = Items.objects.all().order_by("-find_item_time")
     items_per_page = 8  # 페이지당 아이템 수
     max_pages = (all_items.count() + items_per_page - 1) // items_per_page
 
     results = all_items[:items_per_page]
     categories_in_results = Category.objects.all().order_by("id")
+    # for item in results:
+    #     end_url = item.split("?")[0]
+    #     if end_url not in items_url:
+    #         items_url.append(end_url)
+    #     else:
+    #         pass
+    #         # result에서 제거하고
+    #         # 하나 추가
 
     for item in results:
         board_description = item.board_description
@@ -246,13 +168,13 @@ def load_more_items(request):
     end = start + items_per_page
 
     if category_id:
-        items = Items.objects.filter(category=category_id).order_by("-id")
+        items = Items.objects.filter(category=category_id).order_by("-find_item_time")
     elif query:
         items = results = Items.objects.filter(
             Q(item_name__icontains=query) | Q(category__name__icontains=query)
-        ).order_by("-id")
+        ).order_by("-find_item_time")
     else:
-        items = Items.objects.all().order_by("-id")
+        items = Items.objects.all().order_by("-find_item_time")
 
     results = items[start:end]
 
@@ -279,27 +201,26 @@ from django.shortcuts import render
 
 
 def signup(request):
-
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password1 = request.POST.get("password1")
+        password2 = request.POST.get("password2")
 
         if not (username and password1 and password2):
-           return render(request, 'signup.html', {'error': '모든 값을 입력해야 합니다.'})
+            return render(request, "signup.html", {"error": "모든 값을 입력해야 합니다."})
 
         if password1 == password2:
             user = User.objects.create_user(
                 username=username,
-                password=password1,)
-            user.backend = 'django.contrib.auth.backends.ModelBackend'
+                password=password1,
+            )
+            user.backend = "django.contrib.auth.backends.ModelBackend"
             auth.login(request, user)
-            return redirect('/')
+            return redirect("/")
         else:
-            return render(request, 'signup.html', {'error': '비밀번호가 일치하지 않습니다.'})
-    
-    return render(request, 'signup.html')
+            return render(request, "signup.html", {"error": "비밀번호가 일치하지 않습니다."})
 
+    return render(request, "signup.html")
 
 
 def login(request):

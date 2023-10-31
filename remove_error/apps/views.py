@@ -46,7 +46,9 @@ def crawl_page(request):
 
 def item_list_by_category(request, category_id):
     # 선택한 카테고리에 해당하는 아이템들을 필터링합니다.
-    items = Items.objects.filter(category=category_id).order_by("-find_item_time")
+    items = Items.objects.filter(category=category_id, is_end_deal=False).order_by(
+        "-find_item_time"
+    )
     items_per_page = 8  # 페이지당 아이템 수
     max_pages = (items.count() + items_per_page - 1) // items_per_page
 
@@ -81,7 +83,8 @@ def search(request):
     categories = Category.objects.all().order_by("id")
     if query:
         results = Items.objects.filter(
-            Q(item_name__icontains=query) | Q(category__name__icontains=query)
+            (Q(item_name__icontains=query) | Q(category__name__icontains=query))
+            & Q(is_end_deal=False)
         ).order_by("-find_item_time")
 
         items_per_page = 8  # 페이지당 아이템 수
@@ -101,7 +104,7 @@ def search(request):
             "query": query,
         }
     else:
-        all_items = Items.objects.all().order_by("-find_item_time")
+        all_items = Items.objects.filter(is_end_deal=False).order_by("-find_item_time")
         items_per_page = 8  # 페이지당 아이템 수
         max_pages = (all_items.count() + items_per_page - 1) // items_per_page
 
@@ -126,7 +129,7 @@ def detail(request, item_id):
 
 
 def main(request):
-    all_items = Items.objects.all().order_by("-find_item_time")
+    all_items = Items.objects.filter(is_end_deal=False).order_by("-find_item_time")
     items_per_page = 8  # 페이지당 아이템 수
     max_pages = (all_items.count() + items_per_page - 1) // items_per_page
 
@@ -157,13 +160,16 @@ def load_more_items(request):
     end = start + items_per_page
 
     if category_id:
-        items = Items.objects.filter(category=category_id).order_by("-find_item_time")
+        items = Items.objects.filter(category=category_id, is_end_deal=False).order_by(
+            "-find_item_time"
+        )
     elif query:
-        items = results = Items.objects.filter(
-            Q(item_name__icontains=query) | Q(category__name__icontains=query)
+        items = Items.objects.filter(
+            (Q(item_name__icontains=query) | Q(category__name__icontains=query))
+            & Q(is_end_deal=False)
         ).order_by("-find_item_time")
     else:
-        items = Items.objects.all().order_by("-find_item_time")
+        items = Items.objects.filter(is_end_deal=False).order_by("-find_item_time")
 
     results = items[start:end]
 
@@ -240,24 +246,15 @@ def login_form(request):
 
 
 def ranking(request):
-    items_url = set()
-    all_items = Items.objects.all().order_by("-hits", "-find_item_time")
+    all_items = Items.objects.filter(is_end_deal=False).order_by("-hits", "-find_item_time")
     items_per_page = 8  # 페이지당 아이템 수
     max_pages = (all_items.count() + items_per_page - 1) // items_per_page
 
-    results = []
+    results = all_items[:items_per_page]
+
     idx = 0
     categories_in_results = Category.objects.all().order_by("id")
 
-    for item in all_items:
-        idx += 1
-        if len(results) == items_per_page:
-            break
-
-        end_url = item.end_url.split("?")[0]
-        if end_url not in items_url:
-            results.append(item)
-            items_url.add(end_url)
     rank = 1
     for item in results:
         item.rank = rank
@@ -282,7 +279,7 @@ def rank_load_more_items(request):
     items_per_page = 8  # 페이지당 아이템 수
     start = (page - 1) * items_per_page
     end = start + items_per_page
-    items = Items.objects.all().order_by("-hits", "-find_item_time")
+    items = Items.objects.filter(is_end_deal=False).order_by("-hits", "-find_item_time")
 
     results = items[start:end]
     rank = start  # 각 페이지의 첫 번째 항목의 순위로 시작 값 설정

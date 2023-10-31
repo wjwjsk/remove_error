@@ -213,7 +213,7 @@ def pp_crawling_function():
 def qz_crawling_function():
     home = "https://quasarzone.com"
     datas = [[] for _ in range(int(crl_page / 2))]
-    for page in range(0, int(crl_page / 2)):
+    for page in range(1, int(crl_page / 2)):
         soup = insert_soup(home + "/bbs/qb_saleinfo?page=" + str(page + 1))
         list_tags = soup.select("table tbody tr")
         # 게시판 링크+제목+금액+배송비+시간
@@ -287,7 +287,7 @@ def qz_crawling_function():
 def al_crawling_function():
     home = "https://arca.live"
     datas = [[] for _ in range(crl_page)]
-    for page in range(0, crl_page):
+    for page in range(1, crl_page):
         soup = insert_soup(home + "/b/hotdeal?p=" + str(page + 1))
         list_tags = soup.select(".article-list .list-table.hybrid .vrow.hybrid")
         # 게시판 링크+제목+금액+배송비+시간
@@ -351,7 +351,7 @@ def al_crawling_function():
 def ce_crawling_function():
     home = "https://coolenjoy.net"
     datas = [[] for _ in range(crl_page)]
-    for page in range(0, crl_page):
+    for page in range(1, crl_page):
         soup = insert_soup(home + "/bbs/jirum?page=" + str(page + 1))
         list_tags = soup.select(".na-table.d-md-table.w-100 li")
         # 게시판 링크+제목+금액+배송비+시간
@@ -432,7 +432,7 @@ def cl_crawling_function():
     crl_page = 2
     datas = [[] for _ in range(crl_page)]
 
-    for page in range(0, crl_page):
+    for page in range(1, crl_page):
         soup = insert_soup(f"{home}/service/board/jirum?&od=T31&category=1000236&po={page}")
         list_tags = soup.select("div.contents_jirum .list_item.symph_row")
         for link in list_tags:
@@ -444,12 +444,18 @@ def cl_crawling_function():
             else:
                 is_end_deal = False
             in_soup = insert_soup(home + href)
-            bf_find_item_time = in_soup.select_one(".post_view .post_author span").text.rsplit("수정일 : ")[-1]
-            find_item_time = re.sub(
-                r"(\d{4})[.-](\d{2})[.-](\d{2}) (\d{2}):(\d{2}):(\d{2})",
-                r"\1-\2-\3 \4:\5",
-                bf_find_item_time,
-            ).strip().replace(".", "-")
+            bf_find_item_time = in_soup.select_one(".post_view .post_author span").text.rsplit(
+                "수정일 : "
+            )[-1]
+            find_item_time = (
+                re.sub(
+                    r"(\d{4})[.-](\d{2})[.-](\d{2}) (\d{2}):(\d{2}):(\d{2})",
+                    r"\1-\2-\3 \4:\5",
+                    bf_find_item_time,
+                )
+                .strip()
+                .replace(".", "-")
+            )
             outlink = in_soup.select_one(".outlink .url")
             if outlink is not None and outlink.text:
                 shop_url = in_soup.select_one(".outlink .url").text
@@ -746,8 +752,6 @@ def crawling():
     end_time_cl = time.time()  # cl 작업 종료 시간 기록
     elapsed_time_cl = end_time_cl - start_time_cl  # cl 작업 소요 시간 계산
     print(f"cl 작업 완료. 소요 시간: {elapsed_time_cl:.2f} 초")
-
-
 
 
 def load_data_and_insert(file_name):

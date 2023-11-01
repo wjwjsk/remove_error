@@ -92,7 +92,7 @@ def detail(request, item_id):
 
     board_description = item.board_description
     image_urls = board_description.split("<br>")
-    item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
+    item.image_urls = image_urls
     return render(request, "detail_ex1.html", {"item": item})
 
 

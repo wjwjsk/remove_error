@@ -122,7 +122,7 @@ window.addEventListener("click", () => {
 window.onload = function() {
   
     const swiperWrapper = document.querySelector(".swiper-wrapper");
-
+    const imageUrls = {{item.image_urls}}
     imageUrls.forEach(url => {
         const slideDiv = document.createElement("div");
         slideDiv.className = "swiper-slide";

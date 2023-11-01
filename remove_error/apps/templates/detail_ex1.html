@@ -18,7 +18,15 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap" rel="stylesheet">
-    </head>
+      <script>
+
+function openImage(src) {
+  modal.style.display = "block";
+  document.body.style.overflow = "hidden"; // 스크롤바 제거
+  document.getElementById("modal-image").src = src;
+}
+      </script>
+      </head>
     <body>
         {% include "nav.html" %}
 
@@ -27,7 +35,7 @@
             <div class="container px-4 px-lg-5 my-5">
                 <div class="row gx-4 gx-lg-5 align-items-center">
                   <div class="col-md-6 image-container">
-                        <img class="card-img-top mb-5 mb-md-0" src="{{ item.image_url }}" alt="{{ item.item_name }}" onclick="openImage(this.src)" onerror="this.src='{% static "images/no_image.png" %}'; this.style.width='400px';"/>
+                      <img class="card-img-top mb-5 mb-md-0" src="{{ item.image_url }}" alt="{{ item.item_name }}" onclick="openImage(this.src)" onerror="this.src='{% static "images/no_image.png" %}'; this.style.width='400px';"/>
                   </div>
                   <div class="col-md-6">
                     <div class="small mb-1">{{ item.sku }}</div>
@@ -78,7 +86,7 @@
                 <!--<img id="modal-image" src="{{ item.image_url }}" alt="modal-image">-->
                 <div class="swiper-container">
                     <div class="swiper-wrapper">
-                        <div class="swiper-slide"><img id="modal-image" src="{{ item.image_url }}" alt="modal-image">
+                        <div class="swiper-slide"><img id="modal-image" src="{{ item.image_urls|first }}" alt="modal-image">
                         </div>
                         <div class="swiper-slide"></div>
                     </div>
@@ -103,12 +111,31 @@ openModalBtn.addEventListener("click", () => {
   document.body.style.overflow = "hidden"; // 스크롤바 제거
 });
 
+
+
 window.addEventListener("click", () => {
   if (event.target === modal) {
     modal.style.display = "none";
     document.body.style.overflow = "auto"; // 스크롤바 보이기
   }
 });
+
+window.onload = function() {
+  
+    const swiperWrapper = document.querySelector(".swiper-wrapper");
+
+    imageUrls.forEach(url => {
+        const slideDiv = document.createElement("div");
+        slideDiv.className = "swiper-slide";
+
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "modal-image";
+
+        slideDiv.appendChild(img);
+        swiperWrapper.appendChild(slideDiv);
+  });
+};
 
 var swiper = new Swiper('.swiper-container', {
         pagination: '.swiper-pagination',

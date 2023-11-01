@@ -25,18 +25,22 @@
         <!-- Section-->
         <section class="py-5">
             <div class="container px-4 px-lg-5 mt-5">
-                <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+                <div class="row gx-4 gx-lg-5 row-cols-1 row-cols-md-1 row-cols-xl-1 justify-content-center">
+                    {% comment %} <div class="row gx-4 gx-lg-5 justify-content-center"> {% endcomment %}
                     {% for item in items %}
                         <div class="col mb-5">
-                            <div class="card h-100">
+                            <div class="card h-100" style="flex-direction: row;">
                                 <!-- Product image-->
-                                <a href="{% url 'detail' item.id %}">
-                                    <div class="img-container">                                    
-                                        <img class="card-img-top" src="{{ item.image_url }}" onerror="this.src='{% static "images/no_image.png" %}';"  />                                    
-                                    </div>
-                                </a>
+                                <div class="img-container" style="position: relative;">
+                                    <img src="{% static "images/rank1.png" %}"  alt="" style="position: absolute; top: 0; left: 0; z-index: 1;" />
+                                    <a href="{% url 'detail' item.id %}" style="position: relative;">
+                                        <img class="card-img-top" src="{{ item.image_url }}" width="300" height="300" alt="{{ item.item_name }}" style="position: relative; z-index: 0;" 
+                                             onerror="this.src='{% static "images/no_image.png" %}';"/>
+                                    </a>
+                                </div>
+                                
                                 <!-- Product details-->
-                                <div class="card-body p-4">
+                                <div class="card-body p-4" style="flex-direction: column;">
                                     <div class="text-center">
                                         <!-- Product name-->
                                         <p>순위: {{ item.rank }}</p>
@@ -45,11 +49,11 @@
                                         <h5 class="fw-bolder price">{{item.board_price}}</h5>
                                         <!-- Replace this comment with the price from your model -->
                                     </div>
+                                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent b-5">
+                                        <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'detail' item.id %}">자세히 보기</a></div>
+                                    </div>
                                 </div>
                                 <!-- Product actions-->
-                                <div class="card-footer p-4 pt-0 border-top-0 bg-transparent b-5">
-                                    <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'detail' item.id %}">자세히 보기</a></div>
-                                </div>
                             </div>
                         </div>
                     {% endfor %}
@@ -101,25 +105,31 @@
                                 var id = `${item.id}`;
 
                                 var itemHtml = `
-                                <div class="col mb-5">
-                                    <div class="card h-100">
-                                        <div class="img-container">
-                                            <a href="/detail/${item.id}/">
-                                                <img class="card-img-top1" src="${item.image_url}" alt="${item.item_name}" />
-                                            </a>
-                                        </div>
-                                        <div class="card-body p-4">
-                                            <div class="text-center">
-                                                <p>순위: ${ item.rank }</p>
-                                                <h5 class="fw-bolder">${item.item_name}</h5>
-                                                <h5 class="fw-bolder price">${item.board_price}</h5>
+                                    <div class="col mb-5">
+                                        <div class="card h-100" style="flex-direction: row;">
+                                            <div class="img-container">
+                                                <div style="position: relative;">
+                                                    <img src="{% static "images/rank1.png" %}" alt="" style="position: absolute; top: 0; left: 0; z-index: 1;" />
+                                                    <a href="/detail/${item.id}/">
+                                                        <img class="card-img-top1" src="${item.image_url}" alt="${item.item_name}" />
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <div class="card-body p-4" style="flex-direction: column;">
+                                                <div class="text-center">
+                                                    <p>순위: ${item.rank}</p>
+                                                    <h5 class="fw-bolder">${item.item_name}</h5>
+                                                    <h5 class="fw-bolder price">${item.board_price}</h5>
+                                                </div>
+                                            
+                                                <div class="card-footer p-4 pt-0 border-top-0 bg-transparent b-5">
+                                                    <div class="text-center">
+                                                        <a class="btn btn-outline-dark mt-auto b-5" href="/detail/${item.id}/">자세히 보기</a>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent b-5">
-                                            <div class="text-center"><a class="btn btn-outline-dark mt-auto b-5" href="/detail/${item.id}/">자세히 보기</a></div>
-                                        </div>
-                                    </div>
-                                </div>`;
+                                    </div>`;
                             const parentDiv = document.querySelector(".row");
                             const lastChild = parentDiv.lastElementChild;
                             lastChild.insertAdjacentHTML('afterend', itemHtml);
@@ -182,12 +192,25 @@
               }
  
             });
-          }
-        checkImageHeight1()
-        setInterval(function() {
-        checkImageHeight()
-        }, 300);
-          
+            
+        }
+        function adjustImageSizes() {
+            const imgContainers = document.querySelectorAll('.img-container:not(.rank-container) .card-img-top');
+            imgContainers.forEach(container => {
+                const img = container.querySelector('img');
+                if (img.clientHeight < container.clientHeight) {
+                    img.classList.add('larger-image');
+                } else {
+                    img.classList.remove('larger-image');
+                }
+            });
+        }
+        
+        adjustImageSizes();
+        setInterval(adjustImageSizes, 300);
+        
+        
+        
             
 
     </script>

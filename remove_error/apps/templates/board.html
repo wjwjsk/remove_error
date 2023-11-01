@@ -9,11 +9,8 @@
     />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <link rel="icon" href="{% static "images/favicon.ico" %}"
-    type="image/x-icon">
-    <title>글 목록</title>
-    <!-- Favicon-->
-    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <link rel="icon" href="{% static "images/favicon.ico" %}" type="image/x-icon">
+    <title>cooldeal - 게시판</title>
     <!-- Bootstrap icons-->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
@@ -21,8 +18,7 @@
     />
     <!-- Core theme CSS (includes Bootstrap)-->
     <link rel="stylesheet" type="text/css" href="{% static "css/nav.css" %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static "css/common.css"
-    %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static "css/common.css" %}"/>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -45,30 +41,26 @@
   </head>
   <body>
     {% include "nav.html" %}
-
+    <br>
+    <br>
+    <section style="padding-top: 3rem !important; padding-bottom: 3rem !important; min-height: calc(100vh - 15.5rem);">
+      <div class="container px-4 px-lg-5 mt-5">
     <h1>글 목록</h1>
     <table>
-      <thead>
-        <tr>
-          <th>댓글</th>
-          <th>작성자</th>
-          <th>작성일</th>
-        </tr>
-      </thead>
       <tbody>
         {% comment %} {% for post in posts %} {% endcomment %}
         <tr>
           <td>{{ post.content }}</td>
-          <td>{{ post.author }}</td>
-          <td>{{ post.created_at }}</td>
+          <td>{{ post.author }} / {{ post.created_at }}</td>
         </tr>
         {% comment %} {% endfor %} {% endcomment %}
       </tbody>
     </table>
-
+  </div>
+</section>
     <!-- Footer-->
     <footer class="py-o bg-dark">
-      <div class="container">
+      <div class="container1">
         <p class="m-0 text-center text-white">Copyright © cooldeal 2023</p>
       </div>
     </footer>

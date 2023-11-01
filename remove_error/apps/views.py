@@ -21,35 +21,6 @@ from django.utils.encoding import force_bytes
 from django.core.mail import EmailMessage
 
 
-def test(request):
-    items = Items.objects.all()
-
-    categories = Category.objects.all()
-
-    context = {
-        "items": items,
-        "categories": categories,
-    }
-
-    return render(request, "index.html", context)
-
-
-# 크롤링 페이지
-def crawl_page(request):
-    # crawl_page.html 템플릿 렌더링
-    return render(request, "crawl_page.html")
-
-
-# 상세 페이지
-# def item_detail(request, item_id):
-#     item = get_object_or_404(Items, pk=item_id)
-#     context = {
-#         'item': item,
-#     }
-
-#     return render(request, 'item.html', context)
-
-
 def item_list_by_category(request, category_id):
     # 선택한 카테고리에 해당하는 아이템들을 필터링합니다.
     items = Items.objects.filter(category=category_id, is_end_deal=False).order_by(
@@ -73,15 +44,6 @@ def item_list_by_category(request, category_id):
         "category_id": category_id,
     }
     return render(request, "main.html", context)
-
-
-def delete_item(request, item_id):
-    try:
-        item = Items.objects.get(id=item_id)
-        item.delete()
-        return redirect("main")
-    except Items.DoesNotExist:
-        return JsonResponse({"message": "아이템이 존재하지 않습니다."}, status=404)
 
 
 def search(request):
@@ -130,7 +92,7 @@ def detail(request, item_id):
 
     board_description = item.board_description
     image_urls = board_description.split("<br>")
-    item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
+    item.image_urls = image_urls
     return render(request, "detail_ex1.html", {"item": item})
 
 
@@ -199,45 +161,42 @@ def load_more_items(request):
 
 # 로그인 관련
 def signup(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password1 = request.POST.get("password1")
+        password2 = request.POST.get("password2")
+        email = request.POST.get("email")
 
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
-        email = request.POST.get('email')
+        if not (username and password1 and password2):  # and email):#
+            return render(request, "signup.html", {"error": "모든 값을 입력해야 합니다."})
 
-        if not (username and password1 and password2): #and email):#
-            return render(request, 'signup.html', {'error': '모든 값을 입력해야 합니다.'})
-
-        username_regex = re.compile('^[a-zA-Z0-9]+$')
+        username_regex = re.compile("^[a-zA-Z0-9]+$")
         if not username_regex.match(username):
-            return render(request, 'signup.html', {'error': '아이디는 영문자와 숫자만 가능합니다.'})
+            return render(request, "signup.html", {"error": "아이디는 영문자와 숫자만 가능합니다."})
 
         if User.objects.filter(username=username).exists():
-            return render(request, 'signup.html', {'error': '이미 존재하는 아이디입니다.'})
+            return render(request, "signup.html", {"error": "이미 존재하는 아이디입니다."})
 
         if User.objects.filter(email=email).exists():
-            return render(request, 'signup.html', {'error': '이미 사용중인 이메일입니다.'})
+            return render(request, "signup.html", {"error": "이미 사용중인 이메일입니다."})
 
-        password_regex = re.compile('^(?=.*[!@#$%^&*()_+=-])(?=.*[a-zA-Z0-9]).{8,}$')
+        password_regex = re.compile("^(?=.*[!@#$%^&*()_+=-])(?=.*[a-zA-Z0-9]).{8,}$")
 
         if not password_regex.match(password1):
-            return render(request, 'signup.html', {'error': '비밀번호는 8자 이상이며, 특수문자를 포함해야 합니다.'})
+            return render(request, "signup.html", {"error": "비밀번호는 8자 이상이며, 특수문자를 포함해야 합니다."})
 
         if password1 == password2:
-            user = User.objects.create_user(username=username) #email=email)
+            user = User.objects.create_user(username=username)  # email=email)
             user.set_password(password1)
             user.save()
-            user.backend = 'django.contrib.auth.backends.ModelBackend'
+            user.backend = "django.contrib.auth.backends.ModelBackend"
 
             auth.login(request, user)
             return redirect("/")
         else:
+            return render(request, "signup.html", {"error": "비밀번호가 일치하지 않습니다."})
 
-            return render(request, 'signup.html', {'error': '비밀번호가 일치하지 않습니다.'})
-
-    return render(request, 'signup.html')
-
+    return render(request, "signup.html")
 
 
 def login(request):
@@ -249,7 +208,7 @@ def login(request):
             auth.login(request, user)
             return redirect("main")
         else:
-            return render(request, "login.html", {"error": "username or password is incorrect."})
+            return render(request, "login.html", {"error": "아이디 또는 비밀번호가 일치하지 않습니다. 다시 확인해 주세요."})
     else:
         return render(request, "login.html")
 
@@ -267,7 +226,6 @@ def login_form(request):
     return render(request, "login_form.html")
 
 
-
 def find_account(request):
     if request.method == "POST":
         email = request.POST["email"]
@@ -275,25 +233,29 @@ def find_account(request):
             user = User.objects.get(email=email)
             token = default_token_generator.make_token(user)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
-            mail_subject = 'Reset your password'
-            message = render_to_string('find_account_email.html', {
-                'user': user,
-                'domain': request.META['HTTP_HOST'],
-                'uid': uid,
-                'token': token,
-            })
+            mail_subject = "Reset your password"
+            message = render_to_string(
+                "find_account_email.html",
+                {
+                    "user": user,
+                    "domain": request.META["HTTP_HOST"],
+                    "uid": uid,
+                    "token": token,
+                },
+            )
             to_email = email
             email = EmailMessage(mail_subject, message, to=[to_email])
             email.send()
-            return render(request, 'find_account_done.html')
+            return render(request, "find_account_done.html")
         else:
             return render(request, "find_account.html", {"error": "해당 이메일이 존재하지 않습니다."})
     else:
         return render(request, "find_account.html")
 
+
 def ranking(request):
-    all_items = Items.objects.filter(is_end_deal=False).order_by("-hits", "-find_item_time")
-    items_per_page = 8  # 페이지당 아이템 수
+    all_items = Items.objects.filter(is_end_deal=False).order_by("-hits", "-find_item_time")[:20]
+    items_per_page = 4  # 페이지당 아이템 수
     max_pages = (all_items.count() + items_per_page - 1) // items_per_page
 
     results = all_items[:items_per_page]
@@ -322,7 +284,7 @@ def ranking(request):
 
 def rank_load_more_items(request):
     page = int(request.GET.get("page", 1))
-    items_per_page = 8  # 페이지당 아이템 수
+    items_per_page = 4  # 페이지당 아이템 수
     start = (page - 1) * items_per_page
     end = start + items_per_page
     items = Items.objects.filter(is_end_deal=False).order_by("-hits", "-find_item_time")
@@ -349,4 +311,3 @@ def rank_load_more_items(request):
             }
         )
     return JsonResponse({"items": item_data})
-

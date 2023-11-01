@@ -14,7 +14,10 @@
     background-color: #fff;
     border: 1px solid #495057;
     border-radius: 100px;
-    padding: 13px;
+    padding-top: 13px;
+    padding-right: 13px;
+    padding-bottom: 13px;
+    padding-left: 20px;
 }
 
 .login-form{

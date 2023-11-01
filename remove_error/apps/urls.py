@@ -1,7 +1,7 @@
 from django.urls import include, path
 from . import views
 from django.contrib.auth import views as auth_views
-from .views import find_account
+# from .views import find_account
 
 urlpatterns = [
     path("items/<int:category_id>/", views.item_list_by_category, name="item_list_by_category"),
@@ -17,5 +17,6 @@ urlpatterns = [
     # path('social/', include('social_django.urls', namespace='social')),
     path("ranking/", views.ranking, name="ranking"),
     path("rank-load-more-items", views.rank_load_more_items, name="rank_load_more_items"),
-    path("find_account/", find_account, name="find_account"),
+    # path("find_account/", find_account, name="find_account"),
+    path("board/", views.board, name="board"),
 ]

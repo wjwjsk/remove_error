@@ -4,7 +4,7 @@ from uuid import uuid4
 import os
 from phonenumber_field.modelfields import PhoneNumberField
 from datetime import datetime
-
+from django.contrib.auth.models import User
 
 class Items(models.Model):
     item_name = models.CharField(max_length=500) # 커뮤 게시글 제목
@@ -18,7 +18,10 @@ class Items(models.Model):
     delivery_price = models.CharField(max_length=30,null=True) # 게시글 상 배송비(있을 경우에만)
     is_end_deal = models.BooleanField(default=False) # 게시글 삭제 여부 
     category = models.ForeignKey("Category", on_delete=models.CASCADE, null=True, blank=True) 
-    hits = models.IntegerField(default=0,null=True) 
+    hits = models.IntegerField(default=0,null=True)
+    content = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
         db_table = "Items"

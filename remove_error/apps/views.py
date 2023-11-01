@@ -14,11 +14,14 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.backends import ModelBackend
 
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.template.loader import render_to_string
-from django.utils.encoding import force_bytes
-from django.core.mail import EmailMessage
+# from django.contrib.auth.tokens import default_token_generator
+# from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+# from django.template.loader import render_to_string
+# from django.utils.encoding import force_bytes
+# from django.core.mail import EmailMessage
+
+
+from django.contrib.auth.decorators import login_required
 
 
 def item_list_by_category(request, category_id):
@@ -226,31 +229,31 @@ def login_form(request):
     return render(request, "login_form.html")
 
 
-def find_account(request):
-    if request.method == "POST":
-        email = request.POST["email"]
-        if User.objects.filter(email=email).exists():
-            user = User.objects.get(email=email)
-            token = default_token_generator.make_token(user)
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            mail_subject = "Reset your password"
-            message = render_to_string(
-                "find_account_email.html",
-                {
-                    "user": user,
-                    "domain": request.META["HTTP_HOST"],
-                    "uid": uid,
-                    "token": token,
-                },
-            )
-            to_email = email
-            email = EmailMessage(mail_subject, message, to=[to_email])
-            email.send()
-            return render(request, "find_account_done.html")
-        else:
-            return render(request, "find_account.html", {"error": "해당 이메일이 존재하지 않습니다."})
-    else:
-        return render(request, "find_account.html")
+# def find_account(request):
+#     if request.method == "POST":
+#         email = request.POST["email"]
+#         if User.objects.filter(email=email).exists():
+#             user = User.objects.get(email=email)
+#             token = default_token_generator.make_token(user)
+#             uid = urlsafe_base64_encode(force_bytes(user.pk))
+#             mail_subject = "Reset your password"
+#             message = render_to_string(
+#                 "find_account_email.html",
+#                 {
+#                     "user": user,
+#                     "domain": request.META["HTTP_HOST"],
+#                     "uid": uid,
+#                     "token": token,
+#                 },
+#             )
+#             to_email = email
+#             email = EmailMessage(mail_subject, message, to=[to_email])
+#             email.send()
+#             return render(request, "find_account_done.html")
+#         else:
+#             return render(request, "find_account.html", {"error": "해당 이메일이 존재하지 않습니다."})
+#     else:
+#         return render(request, "find_account.html")
 
 
 def ranking(request):
@@ -311,3 +314,8 @@ def rank_load_more_items(request):
             }
         )
     return JsonResponse({"items": item_data})
+
+@login_required
+def board(request):
+    posts = Items.objects.all()
+    return render(request, 'board.html')

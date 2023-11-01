@@ -254,8 +254,8 @@ def find_account(request):
 
 
 def ranking(request):
-    all_items = Items.objects.filter(is_end_deal=False).order_by("-hits", "-find_item_time")
-    items_per_page = 8  # 페이지당 아이템 수
+    all_items = Items.objects.filter(is_end_deal=False).order_by("-hits", "-find_item_time")[:20]
+    items_per_page = 4  # 페이지당 아이템 수
     max_pages = (all_items.count() + items_per_page - 1) // items_per_page
 
     results = all_items[:items_per_page]
@@ -284,7 +284,7 @@ def ranking(request):
 
 def rank_load_more_items(request):
     page = int(request.GET.get("page", 1))
-    items_per_page = 8  # 페이지당 아이템 수
+    items_per_page = 4  # 페이지당 아이템 수
     start = (page - 1) * items_per_page
     end = start + items_per_page
     items = Items.objects.filter(is_end_deal=False).order_by("-hits", "-find_item_time")

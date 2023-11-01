@@ -7805,7 +7805,15 @@ textarea.form-control-lg {
 .py-5 {
   padding-top: 3rem !important;
   padding-bottom: 3rem !important;
+  min-height: calc(100vh - 10rem);
 }
+
+.py-o {
+  padding-top: 3rem !important;
+  padding-bottom: 3rem !important;
+  height: 120px;
+}
+
 
 .pt-0 {
   padding-top: 0 !important;

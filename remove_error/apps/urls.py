@@ -16,6 +16,5 @@ urlpatterns = [
     path("logout/", views.logout, name="logout"),
     # path('social/', include('social_django.urls', namespace='social')),
     path("ranking/", views.ranking, name="ranking"),
-    path("rank-load-more-items", views.rank_load_more_items, name="rank_load_more_items"),
     path("find_account/", find_account, name="find_account"),
 ]

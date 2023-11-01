@@ -59,18 +59,18 @@
                         <div class="col mb-5">
                             <div class="card h-100">
                                 <!-- Product image-->
-                                <div class="img-container">
-                                    <a href="{% url 'detail' item.id %}">
-                                        <img class="card-img-top" src="{{ item.image_url }}" alt="{{ item.item_name }}"  />
-                                    </a>
+                                <a href="{% url 'detail' item.id %}">
+                                <div class="img-container">                                
+                                    <img class="card-img-top" src="{{ item.image_url }}" onerror="this.src='{% static "images/no_image.png" %}'; this.classList.remove('larger-image');">
                                 </div>
+                                </a>
                                 <!-- Product details-->
                                 <div class="card-body p-4">
                                     <div class="text-center">
                                         <!-- Product name-->
                                         <h5 class="fw-bolder">{{ item.item_name }}</h5>
                                         <!-- Product price-->
-                                        <h5 class="fw-bolder price">{{item.board_price}}</h5>
+                                        <h class="fw-bolder price">{{item.board_price}}</h 5>
                                         <!-- Replace this comment with the price from your model -->
                                     </div>
                                 </div>
@@ -89,7 +89,7 @@
         </div>
 
         <!-- Footer-->
-        <footer class="py-5 bg-dark">
+        <footer class="py-o bg-dark">
             <div class="container"><p class="m-0 text-center text-white">Copyright © cooldeal 2023</p></div>
         </footer>
         <!-- Bootstrap core JS-->
@@ -132,11 +132,11 @@
                                 var itemHtml = `
                                 <div class="col mb-5">
                                     <div class="card h-100">
-                                        <div class="img-container">
-                                            <a href="/detail/${item.id}/">
-                                                <img class="card-img-top1" src="${item.image_url}" alt="${item.item_name}" />
-                                            </a>
-                                        </div>
+                                        <a href="/detail/${item.id}/">
+                                            <div class="img-container">
+                                                <img class="card-img-top1" src="${item.image_url}" onerror="this.src='{% static "images/no_image.png" %}';"/>
+                                            </div>
+                                        </a>
                                         <div class="card-body p-4">
                                             <div class="text-center">
                                                 <h5 class="fw-bolder">${item.item_name}</h5>
@@ -185,16 +185,11 @@
             const containers = document.querySelectorAll('.img-container');
             imgs.forEach((img, index) => {
               const container = containers[index];
-                if (img.clientHeight < container.clientHeight) {
-                    img.classList.add('larger-image');
-                  }
-                  else{
-                    
+              img.classList.add('larger-image');
+                if (img.clientHeight >= container.clientHeight) {                   
                     img.classList.remove('larger-image'); // 이전에 추가된 'larger-image' 클래스를 제거합니다.
-                  }
+                }
               });
- 
-
           }
         
         function checkImageHeight() {

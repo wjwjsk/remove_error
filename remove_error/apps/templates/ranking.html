@@ -6,7 +6,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>CoolDeal</title>
+        <link rel="icon" href="{% static "images/favicon.ico" %}" type="image/x-icon">
+        <title>cooldeal - 랭킹</title>
         <!-- Bootstrap icons-->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
         <!-- Core theme CSS (includes Bootstrap)-->
@@ -33,7 +34,8 @@
                                 <div class="img-container" style="position: relative;">
                                     <img src="{% static "images/rank1.png" %}"  alt="" style="position: absolute; top: 0; left: 0; z-index: 1;" />
                                     <a href="{% url 'detail' item.id %}" style="position: relative;">
-                                        <img class="card-img-top" src="{{ item.image_url }}" width="300" height="300" alt="{{ item.item_name }}" style="position: relative; z-index: 0;" />
+                                        <img class="card-img-top" src="{{ item.image_url }}" width="300" height="300" alt="{{ item.item_name }}" style="position: relative; z-index: 0;" 
+                                             onerror="this.src='{% static "images/no_image.png" %}';"/>
                                     </a>
                                 </div>
                                 
@@ -165,16 +167,11 @@
             const containers = document.querySelectorAll('.img-container');
             imgs.forEach((img, index) => {
               const container = containers[index];
-                if (img.clientHeight < container.clientHeight) {
-                    img.classList.add('larger-image');
-                  }
-                  else{
-                    
+              img.classList.add('larger-image');
+                if (img.clientHeight <= container.clientHeight) {                   
                     img.classList.remove('larger-image'); // 이전에 추가된 'larger-image' 클래스를 제거합니다.
-                  }
+                }
               });
- 
-
           }
         
         function checkImageHeight() {

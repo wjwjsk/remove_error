@@ -6,6 +6,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from datetime import datetime
 from django.contrib.auth.models import User
 
+
 class Items(models.Model):
     item_name = models.CharField(max_length=500) # 커뮤 게시글 제목
     end_url = models.CharField(max_length=500) # 커뮤 게시글상 구매페이지 URL
@@ -32,3 +33,13 @@ class Category(models.Model):
 
     class Meta:
         db_table = "Category"
+
+class Comment(models.Model):
+    content = models.CharField(max_length=200)
+    created_at = models.DateTimeField(default=datetime.now)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+    class Meta:
+        db_table = "Comment"
+

@@ -37,9 +37,26 @@
         <br>
         <br>
         <ul class="category-list">
-            <li><a href="{% url 'main' %}">전체</a></li>
+            <button class="custom-main-btn main-btn-12 category0">
+                <span >
+                    <a href="{% url 'main' %}">전체</a>
+                </span> 
+                <span >
+                    <a href="{% url 'main' %}">전체</a>
+                </span>
+            </button>
             {% for category in categories %}
-                <li><a href="{% url 'item_list_by_category' category.id %}">{{ category.name }}</a></li>
+                <li>
+                    <button class="custom-main-btn main-btn-12 category{{category.id}}">
+                        <span>
+                            <a href="{% url 'item_list_by_category' category.id %}">{{ category.name }}</a>
+                        </span> 
+                        <span>
+                            <a href="{% url 'item_list_by_category' category.id %}">{{ category.name }}</a>
+                        </span>
+                    </button>
+                    
+                </li>
             {% empty %}
                 <li>No categories available.</li>
             {% endfor %}
@@ -70,13 +87,15 @@
                                         <!-- Product name-->
                                         <h5 class="fw-bolder">{{ item.item_name }}</h5>
                                         <!-- Product price-->
-                                        <h class="fw-bolder price">{{item.board_price}}</h 5>
-                                        <!-- Replace this comment with the price from your model -->
+                                        <h class="fw-bolder price">{{item.board_price}}</h>
+
                                     </div>
                                 </div>
                                 <!-- Product actions-->
                                 <div class="card-footer p-4 pt-0 border-top-0 bg-transparent b-5">
-                                    <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'detail' item.id %}">자세히 보기</a></div>
+                                    <div class="text-center">
+                                        <p class="elapsed-time">{{ item.elapsed_time }}</p>
+                                        <a class="btn btn-outline-dark mt-auto" href="{% url 'detail' item.id %}">자세히 보기</a></div>
                                 </div>
                             </div>
                         </div>
@@ -144,7 +163,9 @@
                                             </div>
                                         </div>
                                         <div class="card-footer p-4 pt-0 border-top-0 bg-transparent b-5">
-                                            <div class="text-center"><a class="btn btn-outline-dark mt-auto b-5" href="/detail/${item.id}/">자세히 보기</a></div>
+                                            <div class="text-center">
+                                                <p class="elapsed-time">${ item.elapsed_time }</p>
+                                                <a class="btn btn-outline-dark mt-auto b-5" href="/detail/${item.id}/">자세히 보기</a></div>
                                         </div>
                                     </div>
                                 </div>`;
@@ -216,7 +237,7 @@
         checkImageHeight()
         }, 300);
           
-            
+             
 
     </script>
 </html>

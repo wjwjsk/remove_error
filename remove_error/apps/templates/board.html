@@ -58,14 +58,28 @@
       <tbody>
         {% comment %} {% for post in posts %} {% endcomment %}
         <tr>
-          <td>{{ post.content }}</td>
-          <td>{{ post.author }}</td>
-          <td>{{ post.created_at }}</td>
+            <td>{{ post.content }}</td>
+            <td>{{ post.author }}</td>
+            <td>{{ post.created_at }}</td>
         </tr>
-        {% comment %} {% endfor %} {% endcomment %}
-      </tbody>
-    </table>
-
+        {% for comment in post.comments.all %}
+            <tr>
+                <td>{{ comment.content }}</td>
+                <td>{{ comment.author }}</td>
+                <td>{{ comment.created_at|date:"Y-m-d H:i:s" }}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="3">
+                <h2>댓글 작성</h2>
+                <form method="post">
+                    {% csrf_token %} {{ form.as_p }}
+                    <input type="hidden" name="post_id" value="{{ post.id }}" />
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </td>
+        </tr>
+    {% comment %} {% endfor %} {% endcomment %}
     <!-- Footer-->
     <footer class="py-o bg-dark">
       <div class="container">

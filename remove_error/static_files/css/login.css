@@ -1,0 +1,124 @@
+.login-container{
+    width: 440px;
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    margin: auto;
+    position: relative;
+}
+
+
+.login-input{
+    width: -webkit-fill-available;
+    background-color: #fff;
+    border: 1px solid #495057;
+    border-radius: 100px;
+    padding-top: 13px;
+    padding-right: 13px;
+    padding-bottom: 13px;
+    padding-left: 20px;
+}
+
+.login-form{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.login-form label{
+    display: block;
+    margin-bottom:12px
+}
+
+
+.login-button{
+    width: 100%;
+    background-color: #212529;
+    border-radius: 100px;
+    padding: 13px;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor:pointer;
+}
+
+.register-reco{
+    display: flex;
+    flex-direction: column;
+}
+
+button:hover{
+    background-color: #495057;;
+}
+
+.register-reco{
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+}
+
+.register-reco a{
+    text-decoration: none;
+    color: #6c757d;
+    cursor: pointer;
+
+}
+
+  img{
+    height: auto;
+    width: auto;
+  }
+  
+  .social_login-button_google {
+    cursor: pointer;
+    display: flex;
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #222;
+    background-color: #fff;
+    border: 1px solid #bdbdbd;
+    border-radius: 25px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 700;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+.social_login-button_naver {
+    cursor: pointer;
+    display: flex;
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #1EC800;
+    border: 1px solid #bdbdbd;
+    border-radius: 25px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 700;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+.login-button:hover{
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.3s ease;
+}
+
+.error-message {
+    position: absolute; /* 절대 위치 설정 */
+    top: -40px; /* 아이디 입력 창 위로 이동 */
+    left: 50%; /* 가운데 정렬 */
+    transform: translateX(-50%); /* 가운데 정렬을 위한 변형 적용 */
+    text-align: center;
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 5px;
+  }

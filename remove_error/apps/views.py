@@ -293,7 +293,8 @@ def login_form(request):
 
 def get_ranking(request, delta_days):
     # 현재 시간을 얻고 delta_days 이전의 날짜를 계산합니다.
-    today = timezone.now()
+    today = datetime.now()
+
     start_date = today - timedelta(days=delta_days)
 
     # delta_days 이전부터 오늘까지의 데이터를 필터링합니다.

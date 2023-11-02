@@ -1,7 +1,9 @@
+from django.utils import timezone
+from datetime import datetime, timedelta
 import json, re, os, time
 from pathlib import Path
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Items, Category
+from .models import Items, Category, Comment
 from django.http import JsonResponse
 from django.db.models import Q, F
 
@@ -38,6 +40,7 @@ def item_list_by_category(request, category_id):
     for item in results:
         board_description = item.board_description
         image_urls = board_description.split("<br>")
+        item.elapsed_time = calculate_time_difference(item.find_item_time)
         item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
 
     context = {
@@ -66,6 +69,7 @@ def search(request):
         for item in results:
             board_description = item.board_description
             image_urls = board_description.split("<br>")
+            item.elapsed_time = calculate_time_difference(item.find_item_time)
             item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
 
         context = {
@@ -80,12 +84,38 @@ def search(request):
         max_pages = (all_items.count() + items_per_page - 1) // items_per_page
 
         results = all_items[:items_per_page]
+        for item in results:
+            board_description = item.board_description
+            image_urls = board_description.split("<br>")
+            item.elapsed_time = calculate_time_difference(item.find_item_time)
+            item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
+
         context = {
             "items": results,
             "categories": categories,
             "max_pages": max_pages,  # max_pages를 context에 추가
         }
     return render(request, "main.html", context)
+
+
+def calculate_time_difference(find_item_time):
+    try:
+        current_time = datetime.now()
+        find_item_time = datetime.strptime(find_item_time, "%Y-%m-%d %H:%M")
+        time_difference = current_time - find_item_time
+
+        if time_difference < timedelta(minutes=1):
+            return "방금 전"
+        elif time_difference < timedelta(hours=1):
+            return f"{int(time_difference.seconds / 60)}분 전"
+        elif time_difference < timedelta(days=1):
+            return f"{int(time_difference.seconds / 3600)}시간 전"
+        else:
+            days = time_difference.days
+            return f"{days}일 전"
+
+    except ValueError:
+        return "유효하지 않은 형식입니다."
 
 
 def detail(request, item_id):
@@ -96,6 +126,7 @@ def detail(request, item_id):
     board_description = item.board_description
     image_urls = board_description.split("<br>")
     item.image_urls = image_urls
+    item.elapsed_time = calculate_time_difference(item.find_item_time)
     return render(request, "detail_ex1.html", {"item": item})
 
 
@@ -111,6 +142,7 @@ def main(request):
         board_description = item.board_description
         image_urls = board_description.split("<br>")
         item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
+        item.elapsed_time = calculate_time_difference(item.find_item_time)
 
     context = {
         "items": results,
@@ -145,9 +177,11 @@ def load_more_items(request):
     results = items[start:end]
 
     item_data = []
+
     for item in results:
         board_description = item.board_description
         image_urls = board_description.split("<br>")
+        item.elapsed_time = calculate_time_difference(item.find_item_time)
         item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
 
         item_data.append(
@@ -156,6 +190,7 @@ def load_more_items(request):
                 "image_url": item.image_url,
                 "board_price": item.board_price,
                 "id": item.id,
+                "elapsed_time": item.elapsed_time,
                 # 필요한 다른 필드를 여기에 추가하세요.
             }
         )
@@ -256,10 +291,6 @@ def login_form(request):
 #         return render(request, "find_account.html")
 
 
-from django.utils import timezone
-from datetime import timedelta
-
-
 def get_ranking(request, delta_days):
     # 현재 시간을 얻고 delta_days 이전의 날짜를 계산합니다.
     today = timezone.now()
@@ -277,18 +308,15 @@ def get_ranking(request, delta_days):
         rank += 1
         board_description = item.board_description
         image_urls = board_description.split("<br>")
-
+        item.elapsed_time = calculate_time_difference(item.find_item_time)
         item.image_url = image_urls[0] if image_urls else ""
-
-    categories_in_results = Category.objects.all().order_by("id")
 
     context = {
         "items": results,
-        "categories": categories_in_results,
+        "ranking_day": delta_days,
     }
 
     return render(request, "ranking.html", context)
-
 
 
 def day_ranking(request):
@@ -305,5 +333,19 @@ def month_ranking(request):
 
 @login_required
 def board(request):
-    posts = Items.objects.all()
-    return render(request, "board.html")
+    comment = Comment.objects.all()
+    if request.method == "POST":
+        content = request.POST.get("content")
+
+        if not content:
+            return render(request, "board.html", {"error": "댓글을 입력해주세요."})
+        if len(content) > 300:
+            return render(request, "board.html", {"error": "댓글은 300자까지만 입력 가능합니다."})
+
+        comment = Comment.objects.create(
+            content=content, author=request.user, created_at=timezone.now()
+        )
+        comment.save()
+        return redirect("board")
+
+    return render(request, "board.html", {"comment": comment})

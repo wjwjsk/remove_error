@@ -43,8 +43,9 @@
                     <div class="fs-5 mb-5" style="margin-bottom: 3rem !important;">
                       <span class="text-decoration-line-through">{{ item.first_price }}</span>
                       <span>{{ item.board_price }}</span>
-                      <span style="color:silver;">&nbsp;&nbsp;|&nbsp;&nbsp; 배송비: {{ item.delivery_price }}</span>
-                       </div>
+                      <span style="color:silver;">&nbsp;&nbsp;|&nbsp;&nbsp; 배송비: {{ item.delivery_price }} </span>
+                    </div>
+                      <p class = "elapsed-time"style="color:silver;">{{item.elapsed_time}}</p>
                        <div style="gap: 10px; display: grid;">
                         <div class="d-flex" style="width: 300px;">
                           <a class="wfa" href="{{item.end_url}}" target="_blank ">

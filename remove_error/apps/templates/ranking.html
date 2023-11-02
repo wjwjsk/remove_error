@@ -26,11 +26,45 @@
         <br>
         <br>
         <ul class="ranking-list">
-            <li><a href="{% url 'day' %}">일일 랭킹</a></li>
-            <li><a href="{% url 'week' %}">주간 랭킹</a></li>
-            <li><a href="{% url 'ranking' %}">월간 랭킹</a></li>
+            
+            <li>
+                <button class="custom-btn btn-12">
+                    <span>
+                        <a href="{% url 'ranking' %}">일일 랭킹</a>
+                    </span>
+                    <span>
+                        <a href="{% url 'ranking' %}">일일 랭킹</a>
+                    </span>
+                </button>
+                
+            </li>
+
+            <li>
+                <button class="custom-btn btn-12">
+                <span>
+                    <a href="{% url 'week' %}">주간 랭킹</a>
+                </span>
+                <span>
+                    <a href="{% url 'week' %}">주간 랭킹</a>
+                </span>
+                </button>
+            </li>
+            
+            <li>
+                <button class="custom-btn btn-12">
+                <span>
+                    <a href="{% url 'month' %}">월간 랭킹</a>
+                </span>
+                <span>
+                    <a href="{% url 'month' %}">월간 랭킹</a>
+                </span>
+                </button>
+
+            </li>
         </ul>
         <!-- Section-->
+        
+
         <section class="py-5">
             <div class="container px-4 px-lg-5 mt-5">
                 <div class="row gx-4 gx-lg-5 row-cols-1 row-cols-md-1 row-cols-xl-1 justify-content-center">
@@ -50,18 +84,19 @@
                                 </div>
                                 
                                 <!-- Product details-->
-                                <div class="card-body p-4" style="flex-direction: column;">
+                                <div class="card-body p-4 ranking-text-div" style="flex-direction: column;">
                                     <div class="text-center">
                                         <!-- Product name-->
-                                        <p>순위: {{ item.rank }}</p>
                                         <h5 class="fw-bolder">{{ item.item_name }}</h5>
                                         <!-- Product price-->
                                         <h5 class="fw-bolder price">{{item.board_price}}</h5>
                                         <!-- Replace this comment with the price from your model -->
                                     </div>
-                                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent b-5">
-                                        <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'detail' item.id %}">자세히 보기</a></div>
-                                    </div>
+                                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent b-5" >
+                                        <div class="text-center">
+                                            <p class="elapsed-time">{{ item.elapsed_time }}</p>
+                                            <a class="btn btn-outline-dark mt-auto" href="{% url 'detail' item.id %}">자세히 보기</a></div>
+                                        </div>
                                 </div>
                                 <!-- Product actions-->
                             </div>

@@ -49,11 +49,36 @@ table {
     border-collapse: collapse;
     margin-top: 20px;
 }
+    
 
 th, td {
-    border: 1px solid #ccc;
-    padding: 8px;
+    padding: 20px;
 }
+
+.float-right{
+    float: right;
+    background: #afc3e0 !important;
+  }
+  .comments{
+    width: 80%;
+    background: #aaaaaa4f;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #aaaaaa4f;
+  } 
+  .content{
+    font-size: 1.3rem;
+    line-break: anywhere;
+    padding-bottom: 6px;
+    line-height: 30px;
+  }
+  .dsc{
+    font-size: 0.65rem;
+    padding-top: 10px;
+  }
+  textarea {
+    resize: none; /* 박스 크기 조절 불가능 */
+  }
 
 .delete-button {
     background-color: #ff0000;

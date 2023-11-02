@@ -1,7 +1,7 @@
 import json, re, os, time
 from pathlib import Path
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Items, Category
+from .models import Items, Category, Comment
 from django.http import JsonResponse
 from django.db.models import Q, F
 
@@ -290,7 +290,6 @@ def get_ranking(request, delta_days):
     return render(request, "ranking.html", context)
 
 
-
 def day_ranking(request):
     return get_ranking(request, 1)
 
@@ -305,5 +304,19 @@ def month_ranking(request):
 
 @login_required
 def board(request):
-    posts = Items.objects.all()
-    return render(request, "board.html")
+    comment = Comment.objects.all()
+    if request.method == "POST":
+        content = request.POST.get("content")
+
+        if not content:
+            return render(request, "board.html", {"error": "댓글을 입력해주세요."})
+        if len(content) > 300:
+            return render(request, "board.html", {"error": "댓글은 300자까지만 입력 가능합니다."})
+
+        comment = Comment.objects.create(
+            content=content, author=request.user, created_at=timezone.now()
+        )
+        comment.save()
+        return redirect("board")
+
+    return render(request, "board.html", {"comment": comment})

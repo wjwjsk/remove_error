@@ -126,6 +126,7 @@ def detail(request, item_id):
     board_description = item.board_description
     image_urls = board_description.split("<br>")
     item.image_urls = image_urls
+    item.elapsed_time = calculate_time_difference(item.find_item_time)
     return render(request, "detail_ex1.html", {"item": item})
 
 
@@ -318,7 +319,6 @@ def get_ranking(request, delta_days):
     }
 
     return render(request, "ranking.html", context)
-
 
 
 def day_ranking(request):

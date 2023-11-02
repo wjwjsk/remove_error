@@ -23,7 +23,7 @@ table {
     
 
 th, td {
-    padding: 20px;
+    padding: 10px;
 }
 
 .float-right{
@@ -38,10 +38,10 @@ th, td {
     border: 1px solid #aaaaaa4f;
   } 
   .content{
-    font-size: 1.3rem;
+    font-size: 1rem;
     line-break: anywhere;
     padding-bottom: 6px;
-    line-height: 30px;
+    line-height: 25px;
   }
   .dsc{
     font-size: 0.65rem;

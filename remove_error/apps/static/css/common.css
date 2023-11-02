@@ -392,3 +392,7 @@ th, td {
     display: flex;
     justify-content: space-between
   }
+
+fieldset::-webkit-scrollbar {
+    display: none; 
+  }

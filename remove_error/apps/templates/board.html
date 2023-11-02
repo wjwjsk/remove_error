@@ -21,10 +21,10 @@
     {% include "nav.html" %}
     <section
       style="padding-bottom: 3rem !important; min-height: calc(100vh - 15.5rem);">
-      <div class="container px-4 px-lg-5 mt-5">
-        <div style="border: 1px solid #000; padding: 20px; margin: 20px 0; border-radius: 17px;" >
-          <fieldset>
-            <table>
+      <div class="container px-4 px-lg-5 mt-5" style="height:100%">
+        <div style="border: 1px solid #000; margin: 20px 0; border-radius: 17px; height:700px" >
+          <fieldset class="scrollbar" style="height:700px; overflow:scroll">
+            <table style="height:700px">
               <tbody>
                 {% for cmt in comment %}
                   <tr>
@@ -39,22 +39,22 @@
               </tbody>
             </table>
 
-            <div class="container px-4 px-lg-5 mt-5" style="margin-top: 1.5rem !important">
-                <form method="POST">
-                  <div class="row" style="display: grid; gap: 10px">
-                    <div class="form-group col-md-9" style="width: 100%;">
-                      <label for="comment_content"></label>
-                      <textarea type="text"class="form-control"id="comment_content"name="content"placeholder="200글자 이내만 작성 가능합니다."oninput="updateCounter()"rows="3"style="width: -webkit-fill-available;"/ ></textarea>
-                    <div id="counter" style="padding-left: 20px;"></div>
-                    <div class="col-md-3 d-flex align-items-end" style="width: auto; justify-content: end;">
-                      <button type="submit" class="btn btn-primary" id="smt-bnt" style="background:#afc3e0; border:#afc3e0; color: #000;">
-                        댓글 작성
-                      </button>
-                    </div>
-                  </div>
-                </form>
-            </div>
           </fieldset>
+          <div class="container px-4 px-lg-5 mt-5" style="border: 1px solid #000; border-radius: 17px; margin-top: 1.5rem !important ">
+              <form method="POST">
+                <div class="row" style="display: grid; gap: 10px; padding-bottom: 20px;">
+                  <div class="form-group col-md-9" style="width: 100%;">
+                    <label for="comment_content"></label>
+                    <textarea type="text"class="form-control"id="comment_content"name="content"placeholder="200글자 이내만 작성 가능합니다."oninput="updateCounter()"rows="3"style="width: -webkit-fill-available;"/ ></textarea>
+                  <div id="counter" style="padding-left: 20px;"></div>
+                  <div class="col-md-3 d-flex align-items-end" style="width: auto; justify-content: end;">
+                    <button type="submit" class="btn btn-primary" id="smt-bnt" style="background:#afc3e0; border:#afc3e0; color: #000;">
+                      댓글 작성
+                    </button>
+                  </div>
+                </div>
+              </form>
+          </div>
         </div>
       </div>
     </section>
@@ -116,6 +116,27 @@
       
       // 함수 호출 예시
       convertLinks(); {% endcomment %}
+      function scrollDown() {
+        var fieldset = document.querySelector('fieldset');
+        fieldset.scrollTop = fieldset.scrollHeight;
+      }
+    
+      function scrollToBottom() {
+        var fieldset = document.querySelector('fieldset');
+        fieldset.scrollTop = fieldset.scrollHeight;
+      }
+    
+      window.onload = function() {
+        scrollToBottom(); 
+      }
+    
+      const commentForm = document.querySelector('form');
+    
+      if (commentForm) {
+        commentForm.addEventListener('submit', function(event) {
+          scrollDown();
+        });
+      }
     </script>
     
   </body>

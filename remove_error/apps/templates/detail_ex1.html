@@ -20,56 +20,43 @@
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap" rel="stylesheet">
       <script>
 
-function openImage(src) {
+{% comment %} function openImage(src) {
   modal.style.display = "block";
   document.body.style.overflow = "hidden"; // 스크롤바 제거
   document.getElementById("modal-image").src = src;
-}
+} {% endcomment %}
       </script>
       </head>
     <body>
         {% include "nav.html" %}
         <!-- Product section-->
-        <section class="py-5">
+        <section class="py-5" style="padding-top: 6rem !important; min-height: calc(96.9vh - 9rem);">
             <div class="container px-4 px-lg-5 my-5">
                 <div class="row gx-4 gx-lg-5 align-items-center">
                   <div class="col-md-6 image-container">
-                      <img class="card-img-top mb-5 mb-md-0" src="{{ item.image_urls | first }}" alt="{{ item.item_name }}" onclick="openImage(this.src)" onerror="this.src='{% static "images/no_image.png" %}'; this.style.width='400px';"/>
+                      <img class="card-img-top mb-5 mb-md-0" src="{{ item.image_urls | first }}" alt="{{ item.item_name }}" onerror="this.src='{% static "images/no_image.png" %}'; this.style.width='400px';"/>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-md-6" style="padding-left: 50px;">
                     <div class="small mb-1">{{ item.sku }}</div>
                     <span class="category">{{ item.category.name }}</span>
                     <h1 class="display-5 fw-bolder">{{ item.item_name }}</h1>
-                    <div class="fs-5 mb-5">
+                    <div class="fs-5 mb-5" style="margin-bottom: 3rem !important;">
                       <span class="text-decoration-line-through">{{ item.first_price }}</span>
                       <span>{{ item.board_price }}</span>
                       <span style="color:silver;">&nbsp;&nbsp;|&nbsp;&nbsp; 배송비: {{ item.delivery_price }}</span>
                        </div>
-                        <p class="lead"></p>
-                        <div class="d-flex">
-                            <a href="{{item.board_url}}" target="_blank">
-                                <button class="btn btn-secondary flex-shrink-0" type="button" style="margin-right:10px;">
-                                    본문으로 이동
-                                </button>
-                            <a>
-                            
-                            <a href="{{item.end_url}}" target="_blank">
-                                <button class="btn btn-outline-dark flex-shrink-0">
-                                    <i class="bi-box-arrow-up-right me-1"></i>
-                                    구매 사이트로 이동
-                                </button>
-                            </a>
-
-                    </div>
-                    <p class="lead">{{ item.description }}</p>
-                    <!--
-                    <div class="d-flex">
-                      <input class="form-control text-center me-3" id="inputQuantity" type="number" value="1" style="max-width: 3rem" />
-                      <button class="btn btn-outline-dark flex-shrink-0" type="button">
-                        <i class="bi-cart-fill me-1"></i>
-                        Add to cart
-                      </button>
-                    </div>-->
+                       <div style="gap: 10px; display: grid;">
+                        <div class="d-flex" style="width: 300px;">
+                          <a class="wfa" href="{{item.end_url}}" target="_blank ">
+                            <button class="btn btn-secondary flex-shrink-0 wfa" style="height: 50px;" ><i class="bi-box-arrow-up-right me-1" ></i>구매 사이트로 이동</button>
+                          </a>
+                        </div>
+                        <div class="d-flex " style="width: 300px;">
+                          <a class="wfa" href="{{item.board_url}}" target="_blank">
+                            <button class="btn btn-outline-dark flex-shrink-0 wfa" type="button" style="height: 50px;">본문으로 이동</button>
+                          </a>
+                        </div>
+                      </div>
                   </div>
                 </div>
               </div>
@@ -81,18 +68,26 @@ function openImage(src) {
         </footer>
 
         <div id="modal">
-            <div class="modal-content">
+            <div class="modal-content" style="margin: 7% auto; height: 70%;">
                 <!--<img id="modal-image" src="{{ item.image_url }}" alt="modal-image">-->
                 <div class="swiper-container">
                     <div class="swiper-wrapper">
-                        <div class="swiper-slide"><img id="modal-image" src="{{ item.image_urls|first }}" alt="modal-image">
-                        </div>
-                        <div class="swiper-slide"></div>
+                      {% if item.image_urls|length > 1 %}
+                        {% for img in item.image_urls|slice:"-1" %}
+                          <div class="swiper-slide"><img id="modal-image" src="{{ img }}" alt="modal-image"></div>
+                        {% endfor %}
+                        {% else %}
+                          <div class="swiper-slide"><img id="modal-image" src="{{ item.image_urls|first }}" alt="modal-image"></div>
+                        {% endif %}                      
+                     
+                      
                     </div>
+                    
                     <div class="swiper-pagination"></div>
                     <div class="swiper-button-next"></div>
                     <div class="swiper-button-prev"></div>
                 </div>
+                
             </div>
         </div>
 
@@ -103,48 +98,96 @@ function openImage(src) {
 
 const modal = document.getElementById("modal");
 const openModalBtn = document.querySelector(".card-img-top");
-
+const nextButton = document.querySelector(".swiper-button-next")
+const prevButton = document.querySelector(".swiper-button-prev")
 
 // 모달창 열기
-openModalBtn[0].addEventListener("click", () => {
+openModalBtn.addEventListener("click", () => {
   modal.style.display = "block";
+  swiper.update();  
   document.body.style.overflow = "hidden"; // 스크롤바 제거
+  
+  if (nextButton.classList.contains("swiper-button-disabled")) {
+    nextButton.style.display = "none";
+  }
+  else{
+    nextButton.style.display = "block";
+  }
+  if (prevButton.classList.contains("swiper-button-disabled")) {
+    prevButton.style.display = "none";
+  }
+  else{
+    prevButton.style.display = "block";
+  }
 });
+
+nextButton.addEventListener("click", () => {
+  if (nextButton.classList.contains("swiper-button-disabled")) {
+    nextButton.style.display = "none";
+  }
+  else{
+    nextButton.style.display = "block";
+  }
+  if (prevButton.classList.contains("swiper-button-disabled")) {
+    prevButton.style.display = "none";
+  }
+  else{
+    prevButton.style.display = "block";
+  }
+});
+
+prevButton.addEventListener("click", () => {
+  if (nextButton.classList.contains("swiper-button-disabled")) {
+    nextButton.style.display = "none";
+  }
+  else{
+    nextButton.style.display = "block";
+  }
+  if (prevButton.classList.contains("swiper-button-disabled")) {
+    prevButton.style.display = "none";
+  }
+  else{
+    prevButton.style.display = "block";
+  }
+});
+
 
 
 
 window.addEventListener("click", () => {
   if (event.target === modal) {
     modal.style.display = "none";
-    document.body.style.overflow = "auto"; // 스크롤바 보이기
   }
 });
 
-window.onload = function() {
-  
+{% comment %} window.onload = function() {
+    
     const swiperWrapper = document.querySelector(".swiper-wrapper");
     const imageUrls = {{item.image_urls | safe}}
     
-    imageUrls.forEach(url => {
-        const slideDiv = document.createElement("div");
-        slideDiv.className = "swiper-slide";
-
-        const img = document.createElement("img");
-        img.src = url;
-        img.alt = "modal-image";
-
-        slideDiv.appendChild(img);
-        swiperWrapper.appendChild(slideDiv);
-  });
-};
+    for (let i = 0; i < imageUrls.length - 1; i++) {
+      const url = imageUrls[i];
+    
+      const slideDiv = document.createElement("div");
+      slideDiv.className = "swiper-slide";
+    
+      const img = document.createElement("img");
+      img.classList.add = "swiper-img";
+      img.src = url;
+      img.alt = "modal-image";
+      slideDiv.appendChild(img);
+      swiperWrapper.appendChild(slideDiv);
+    }
+}; {% endcomment %}
 
 var swiper = new Swiper('.swiper-container', {
-        pagination: '.swiper-pagination',
-        paginationClickable: true,
+        //pagination: '.swiper-pagination',
+        //paginationClickable: true,
         nextButton: '.swiper-button-next',
         prevButton: '.swiper-button-prev',
         spaceBetween: 30
 });
+
 
 
         </script>

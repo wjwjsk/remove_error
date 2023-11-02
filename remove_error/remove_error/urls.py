@@ -16,12 +16,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.views.static import serve
+from django.conf import settings
+from django.urls import re_path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include('social_django.urls')),
+    path("", include("social_django.urls")),
     path("", include("apps.urls")),
-    
-    path('accounts/', include('allauth.urls')),
-
+    path("accounts/", include("allauth.urls")),
 ]
+
+if settings.DEBUG is False:
+    urlpatterns += [
+        re_path(
+            r"^static/(?P<path>.*)$", serve, {"document_root": settings.STATIC_ROOT}
+        )
+    ]

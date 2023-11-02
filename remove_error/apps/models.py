@@ -35,7 +35,7 @@ class Category(models.Model):
 
 
 class Comment(models.Model):
-    content = models.CharField(max_length=200)
+    content = models.CharField(max_length=300)
     created_at = models.DateTimeField(default=datetime.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
 

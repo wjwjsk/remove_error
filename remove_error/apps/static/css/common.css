@@ -48,7 +48,8 @@ th, td {
 
 .search-container input[type="text"] {
     padding: 8px;
-    border: 1px solid #ccc;
+    border: none;
+    border-bottom: 2px solid #ccc;
     border-radius: 5px;
 }
 
@@ -57,6 +58,8 @@ th, td {
     background-color: #333;
     color: #fff;
     border: none;
+    border-bottom: 2px solid #ccc;
+
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;

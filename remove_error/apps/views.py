@@ -308,14 +308,12 @@ def get_ranking(request, delta_days):
         rank += 1
         board_description = item.board_description
         image_urls = board_description.split("<br>")
-
+        item.elapsed_time = calculate_time_difference(item.find_item_time)
         item.image_url = image_urls[0] if image_urls else ""
-
-    categories_in_results = Category.objects.all().order_by("id")
 
     context = {
         "items": results,
-        "categories": categories_in_results,
+        "ranking_day": delta_days,
     }
 
     return render(request, "ranking.html", context)

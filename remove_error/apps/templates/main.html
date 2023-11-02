@@ -37,9 +37,26 @@
         <br>
         <br>
         <ul class="category-list">
-            <li><a href="{% url 'main' %}">전체</a></li>
+            <button class="custom-main-btn main-btn-12 category0">
+                <span >
+                    <a href="{% url 'main' %}">전체</a>
+                </span> 
+                <span >
+                    <a href="{% url 'main' %}">전체</a>
+                </span>
+            </button>
             {% for category in categories %}
-                <li><a href="{% url 'item_list_by_category' category.id %}">{{ category.name }}</a></li>
+                <li>
+                    <button class="custom-main-btn main-btn-12 category{{category.id}}">
+                        <span>
+                            <a href="{% url 'item_list_by_category' category.id %}">{{ category.name }}</a>
+                        </span> 
+                        <span>
+                            <a href="{% url 'item_list_by_category' category.id %}">{{ category.name }}</a>
+                        </span>
+                    </button>
+                    
+                </li>
             {% empty %}
                 <li>No categories available.</li>
             {% endfor %}
@@ -220,7 +237,7 @@
         checkImageHeight()
         }, 300);
           
-            
+             
 
     </script>
 </html>

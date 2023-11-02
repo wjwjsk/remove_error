@@ -16,8 +16,9 @@ urlpatterns = [
     path("signup/", views.signup, name="signup"),
     path("logout/", views.logout, name="logout"),
     # path('social/', include('social_django.urls', namespace='social')),
-    path("ranking/", views.ranking, name="ranking"),
-    # path("rank-load-more-items", views.rank_load_more_items, name="rank_load_more_items"),
+    path("day/", views.day_ranking, name="day"),
+    path("week/", views.week_ranking, name="week"),
+    path("month/", views.month_ranking, name="ranking"),
     # path("find_account/", find_account, name="find_account"),
     path("board/", views.board, name="board"),
 ]

@@ -95,3 +95,57 @@ th, td {
     background-color: #555;
 }
 
+
+
+
+.ranking-list {
+    display: flex;
+    list-style: none;
+    justify-content: center;
+}
+.ranking-list li {
+    width: 200px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    margin: 1.5em;
+    cursor: pointer;
+    padding: 1em;
+    background: rgb(43, 43, 43);
+    position: relative;
+    color: white;
+    border-radius: 5px;
+}
+.ranking-list li::before,
+.ranking-list li::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    border-radius: 5px;
+    width: 105%;
+    transition: all 0.4s;
+}
+.ranking-list li::before {
+    left: 0%;
+    height: 130%;
+    background: linear-gradient(to right, #021B79, #0575E6);
+}
+.ranking-list li::after {
+    left: -10%;
+    height: 120%;
+    background: #ffffff56;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.164);
+}
+.ranking-list li:hover::before {
+    transform: translateX(-2.5%);
+}
+.ranking-list li:hover::after {
+    transform: translateX(15%);
+}
+.ranking-list a {
+    text-decoration: none;
+    color: white;
+}
+
+/* Additional styles for other elements can be added below */

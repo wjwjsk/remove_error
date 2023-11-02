@@ -256,18 +256,31 @@ def login_form(request):
 #         return render(request, "find_account.html")
 
 
-def ranking(request):
-    results = Items.objects.filter(is_end_deal=False).order_by("-hits", "-find_item_time")[:20]
+from django.utils import timezone
+from datetime import timedelta
 
-    categories_in_results = Category.objects.all().order_by("id")
 
+def get_ranking(request, delta_days):
+    # 현재 시간을 얻고 delta_days 이전의 날짜를 계산합니다.
+    today = timezone.now()
+    start_date = today - timedelta(days=delta_days)
+
+    # delta_days 이전부터 오늘까지의 데이터를 필터링합니다.
+    results = Items.objects.filter(
+        is_end_deal=False, find_item_time__gte=start_date, find_item_time__lte=today
+    ).order_by("-hits", "-find_item_time")[:20]
+
+    # 순위 부여
     rank = 1
     for item in results:
         item.rank = rank
         rank += 1
         board_description = item.board_description
         image_urls = board_description.split("<br>")
-        item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
+
+        item.image_url = image_urls[0] if image_urls else ""
+
+    categories_in_results = Category.objects.all().order_by("id")
 
     context = {
         "items": results,
@@ -276,7 +289,21 @@ def ranking(request):
 
     return render(request, "ranking.html", context)
 
+
+
+def day_ranking(request):
+    return get_ranking(request, 1)
+
+
+def week_ranking(request):
+    return get_ranking(request, 7)
+
+
+def month_ranking(request):
+    return get_ranking(request, 30)
+
+
 @login_required
 def board(request):
     posts = Items.objects.all()
-    return render(request, 'board.html')
+    return render(request, "board.html")

@@ -307,6 +307,7 @@ def get_ranking(request, delta_days):
         rank += 1
         board_description = item.board_description
         image_urls = board_description.split("<br>")
+
         item.image_url = image_urls[0] if image_urls else ""
 
     categories_in_results = Category.objects.all().order_by("id")
@@ -317,6 +318,7 @@ def get_ranking(request, delta_days):
     }
 
     return render(request, "ranking.html", context)
+
 
 
 def day_ranking(request):

@@ -27,19 +27,6 @@
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap"
       rel="stylesheet"
     />
-    <style>
-      /* 추가한 CSS 스타일 */
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      th,
-      td {
-        padding: 8px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-      }
-    </style>
   </head>
   <body>
     {% include "nav.html" %}
@@ -53,17 +40,49 @@
       "
     >
       <div class="container px-4 px-lg-5 mt-5">
-        <h1>글 목록</h1>
-        <table>
-          <tbody>
-            {% comment %} {% for post in posts %} {% endcomment %}
-            <tr>
-              <td>{{ post.content }}</td>
-              <td>{{ post.author }} / {{ post.created_at }}</td>
-            </tr>
-            {% comment %} {% endfor %} {% endcomment %}
-          </tbody>
-        </table>
+        <div style="border: 1px solid #000; padding: 20px; margin: 20px 0">
+          <fieldset>
+            <table>
+              <tbody>
+                <tr>
+                  <td>댓글 내용: {{ comment.content }}</td>
+                </tr>
+                <tr>
+                  <td>작성자: {{ comment.author }}</td>
+                  <td>/ 작성 시간: {{ comment.created_at }}</td>
+                </tr>
+                {% for comment in comments %}
+                <tr>
+                  <td>{{ comment.content }}</td>
+                  <td>{{ comment.author }}</td>
+                  <td>{{ comment.created_at }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+
+            <div class="container px-4 px-lg-5 mt-5">
+              <h2></h2>
+              <div class="row">
+                <div class="form-group col-md-9">
+                  <label for="comment_content"></label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="comment_content"
+                    name="content"
+                    required
+                  />
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                  <button type="submit" class="btn btn-primary">
+                    댓글 작성
+                  </button>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </div>
       </div>
     </section>
     <!-- Footer-->

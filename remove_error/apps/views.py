@@ -333,7 +333,7 @@ def month_ranking(request):
 
 @login_required
 def board(request):
-    comment = Comment.objects.all()
+    comment = Comment.objects.all().order_by("created_at")
     if request.method == "POST":
         content = request.POST.get("content")
 

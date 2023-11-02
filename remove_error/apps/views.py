@@ -267,7 +267,10 @@ def ranking(request):
         rank += 1
         board_description = item.board_description
         image_urls = board_description.split("<br>")
-        item.image_url = image_urls[0] if image_urls else ""  # 첫 번째 이미지 URL을 사용
+        if len(image_urls) <= 1:
+            item.image_url = image_urls[0] if image_urls else "" # 첫 번째 이미지 URL을 사용
+        else:
+            item.image_url = image_urls  
 
     context = {
         "items": results,
@@ -276,7 +279,8 @@ def ranking(request):
 
     return render(request, "ranking.html", context)
 
+
 @login_required
 def board(request):
     posts = Items.objects.all()
-    return render(request, 'board.html')
+    return render(request, "board.html")

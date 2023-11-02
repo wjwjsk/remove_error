@@ -11,9 +11,7 @@
     <meta name="author" content="" />
     <link rel="icon" href="{% static "images/favicon.ico" %}"
     type="image/x-icon">
-    <title>글 목록</title>
-    <!-- Favicon-->
-    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <title>cooldeal - 게시판</title>
     <!-- Bootstrap icons-->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
@@ -45,44 +43,32 @@
   </head>
   <body>
     {% include "nav.html" %}
-
-    <h1>글 목록</h1>
-    <table>
-      <thead>
-        <tr>
-          <th>댓글</th>
-          <th>작성자</th>
-          <th>작성일</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% comment %} {% for post in posts %} {% endcomment %}
-        <tr>
-            <td>{{ post.content }}</td>
-            <td>{{ post.author }}</td>
-            <td>{{ post.created_at }}</td>
-        </tr>
-        {% for comment in post.comments.all %}
+    <br />
+    <br />
+    <section
+      style="
+        padding-top: 3rem !important;
+        padding-bottom: 3rem !important;
+        min-height: calc(100vh - 15.5rem);
+      "
+    >
+      <div class="container px-4 px-lg-5 mt-5">
+        <h1>글 목록</h1>
+        <table>
+          <tbody>
+            {% comment %} {% for post in posts %} {% endcomment %}
             <tr>
-                <td>{{ comment.content }}</td>
-                <td>{{ comment.author }}</td>
-                <td>{{ comment.created_at|date:"Y-m-d H:i:s" }}</td>
+              <td>{{ post.content }}</td>
+              <td>{{ post.author }} / {{ post.created_at }}</td>
             </tr>
-        {% endfor %}
-        <tr>
-            <td colspan="3">
-                <h2>댓글 작성</h2>
-                <form method="post">
-                    {% csrf_token %} {{ form.as_p }}
-                    <input type="hidden" name="post_id" value="{{ post.id }}" />
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
-            </td>
-        </tr>
-    {% comment %} {% endfor %} {% endcomment %}
+            {% comment %} {% endfor %} {% endcomment %}
+          </tbody>
+        </table>
+      </div>
+    </section>
     <!-- Footer-->
     <footer class="py-o bg-dark">
-      <div class="container">
+      <div class="container1">
         <p class="m-0 text-center text-white">Copyright © cooldeal 2023</p>
       </div>
     </footer>

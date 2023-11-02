@@ -2868,7 +2868,7 @@ textarea.form-control-lg {
 
 .btn-secondary {
   --bs-btn-color: #fff;
-  --bs-btn-bg: #6c757d;
+  --bs-btn-bg: #44b2c5;
   --bs-btn-border-color: #6c757d;
   --bs-btn-hover-color: #fff;
   --bs-btn-hover-bg: #5c636a;
@@ -7813,7 +7813,19 @@ textarea.form-control-lg {
   padding-bottom: 3rem !important;
   height: 120px;
 }
-
+#modal-image{
+  height: -webkit-fill-available;
+  width: -webkit-fill-available;
+  object-fit: contain;
+}
+.swiper-slide img{
+  height: -webkit-fill-available;
+  width: -webkit-fill-available;
+  object-fit: contain;
+}
+.wfa{
+  width: -webkit-fill-available;
+}
 
 .pt-0 {
   padding-top: 0 !important;

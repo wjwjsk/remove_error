@@ -158,6 +158,7 @@ prevButton.addEventListener("click", () => {
 window.addEventListener("click", () => {
   if (event.target === modal) {
     modal.style.display = "none";
+    document.body.style.overflow = "auto";
   }
 });
 

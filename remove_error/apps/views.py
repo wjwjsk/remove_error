@@ -155,9 +155,11 @@ def main(request):
 
     # 데이터의 수가 2000개를 초과하는지 확인합니다.
     if current_count > 2000:
-        # 오래된 데이터를 선택하여 삭제합니다.
-        old_items = Items.objects.order_by("clr_update_time")[:current_count - 2000]
-        old_items.delete()
+        # 오래된 데이터의 ID 값을 가져옵니다.
+        old_item_ids = Items.objects.order_by("clr_update_time")[:current_count - 2000].values_list("id", flat=True)
+
+        # 해당 ID 값을 가진 레코드를 삭제합니다.
+        Items.objects.filter(id__in=old_item_ids).delete()
 
     return render(request, "main.html", context)
 
